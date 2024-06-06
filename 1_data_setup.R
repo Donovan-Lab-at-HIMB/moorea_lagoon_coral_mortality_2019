@@ -74,9 +74,12 @@ prev_avg <- data_expanded %>% group_by(Genus,Site) %>% summarise(meanPrev=mean(P
 
 prev_n <- data_expanded %>% group_by(Genus,Site) %>% summarise(n_obs=length(Percent_dead)) %>% ungroup() %>% tidyr::pivot_wider(names_from=Genus,values_from=n_obs,names_prefix="n_obs_")
 
-poc_sev_avg <- data_expanded %>% filter(Genus=="Pocillopora" & Percent_dead > 0) %>% group_by(Site) %>% summarise(meanSevPoc=mean(Percent_dead),n_dead_Poc=length(Percent_dead))
+#poc_sev_avg <- data_expanded %>% filter(Genus=="Pocillopora" & Percent_dead > 0) %>% group_by(Site) %>% summarise(meanSevPoc=mean(Percent_dead),n_dead_Poc=length(Percent_dead))
+#calculating the proportion of corals that are severely dead (>75%)
+poc_sev_avg <- data_expanded %>% filter(Genus=="Pocillopora" & Percent_dead > 0) %>% mutate(Sev_dead=ifelse(Percent_dead>75,1,0)) %>% group_by(Site) %>% summarise(meanSevPoc=mean(Sev_dead),n_dead_Poc=length(Percent_dead))
 
-acr_sev_avg <- data_expanded %>% filter(Genus=="Acropora" & Percent_dead > 0) %>% group_by(Site) %>% summarise(meanSevAcr=mean(Percent_dead),n_dead_Acr=length(Percent_dead))
+#acr_sev_avg <- data_expanded %>% filter(Genus=="Acropora" & Percent_dead > 0) %>% group_by(Site) %>% summarise(meanSevAcr=mean(Percent_dead),n_dead_Acr=length(Percent_dead))
+acr_sev_avg <- data_expanded %>% filter(Genus=="Acropora" & Percent_dead > 0) %>% mutate(Sev_dead=ifelse(Percent_dead>75,1,0)) %>% group_by(Site) %>% summarise(meanSevAcr=mean(Sev_dead),n_dead_Poc=length(Percent_dead))
 
 map_fig_data <- data_expanded %>% 
   filter(!grepl("LTER",Site)) %>%  filter(Habitat_go=='Lagoon') %>% 
