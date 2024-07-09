@@ -1,4 +1,4 @@
-genus <- "Acropora"
+genus <- "Pocillopora"
 size_class <- "all"
 response <- "Percent_dead"
 mod_version <- "Nsubmodel" #what the data is going to be called when exported

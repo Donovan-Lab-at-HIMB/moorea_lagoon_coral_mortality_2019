@@ -29,7 +29,7 @@ prev_poc<-subset(prev_poc, factor!="beta_colony_depth")
 prev_poc$factor<-factor(prev_poc$factor, levels=c("beta_cumheat_X_N","beta_cumheat","beta_N"))
 prev_poc$Size<-factor(prev_poc$Size, levels=c("Size4","Size3","Size1and2","All"))
 
-prevalence_poc<-ggplot(prev_poc, aes(x=quant50, y=factor, color=Size))+
+prevalence_poc<-ggplot(subset(prev_poc, Size=="All"), aes(x=quant50, y=factor, color=Size))+
   geom_vline(xintercept=0, linetype="dashed", color="darkgray")+
   geom_point(position = position_dodge(0.75), size=2)+
   geom_errorbar(position = position_dodge(0.75),aes(xmin=quant2.5, xmax=quant97.5, width = 0))+
@@ -38,8 +38,8 @@ prevalence_poc<-ggplot(prev_poc, aes(x=quant50, y=factor, color=Size))+
   xlab("Effect")+
   ylab("")+
   scale_y_discrete(labels = c("Heat x N", "Heat", "N"))+
-  scale_color_manual(values = c("#B8190F", "#FE5F55", "#FF9086", "black"), guide = guide_legend(reverse = TRUE),
-                     labels = c("30+ cm", "20-29 cm","5-19 cm","All"))+
+  #scale_color_manual(values = c("#B8190F", "#FE5F55", "#FF9086", "black"), guide = guide_legend(reverse = TRUE),
+  #                   labels = c("30+ cm", "20-29 cm","5-19 cm","All"))+
   theme_classic()+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(axis.text.x = element_text(colour="black", size=14), 
@@ -50,6 +50,8 @@ prevalence_poc<-ggplot(prev_poc, aes(x=quant50, y=factor, color=Size))+
   theme(axis.ticks = element_line(color="black"))+
   theme(legend.text=element_text(size=12))
 
+levels(prev_poc$Size)
+levels(prev_poc$factor)
 ##----------------------------- Acropora Prevalence -----------------------------
 
 #inputting results from the model
