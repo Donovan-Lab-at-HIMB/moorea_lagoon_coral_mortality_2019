@@ -91,3 +91,6 @@ map_fig_data <- data_expanded %>%
   left_join(acr_sev_avg,by="Site")
 
 write.csv(map_fig_data, "data/final_model_inputs/site_data_for_map.csv", row.names=F)
+
+# correlation between heat stress and N
+cor.test(map_fig_data$meanN, map_fig_data$max_heatstress, method="pearson")

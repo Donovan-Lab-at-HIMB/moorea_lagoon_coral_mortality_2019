@@ -2,9 +2,10 @@ library(rjags)
 library(boot)
 library(ggplot2)
 library(dplyr)
+library(tidyverse)
 
 genus <- "Acropora"
-size_class <-1 #"all" 
+size_class <-"all" 
 response <- "Percent_dead"
 mod_version <- "Nsubmodel"
 mod_version_jags <- "binom_hierarchical.jags"
@@ -14,8 +15,9 @@ mod_date <- "2024-05-24"
 
 mod <- readRDS(paste0('model_out/',distgo,'_',genus,'_',response,'_',size_class,'Size_',mod_date,'_',mod_version,'.Rdata'))
 
-data_in <- read.csv(paste0(out_dir,distgo,"_Acropora_1Size_data_in.csv"))
-site_data_in <- read.csv(paste0(out_dir,distgo,"_Acropora_1Size_site_data_in.csv"))
+# make sure to change these for the correct size class model!
+data_in <- read.csv(paste0(out_dir,distgo,"_Acropora_allSize_data_in.csv"))
+site_data_in <- read.csv(paste0(out_dir,distgo,"_Acropora_allSize_site_data_in.csv"))
 
 # run these for the all plot
 #data_in <- read.csv(paste0(out_dir,distgo,"_Acropora_allSize_data_in.csv"))
@@ -109,135 +111,132 @@ post_out <- post_out %>% left_join(raw_out, by='site_index_reset')
 
 #creating names for cumulative temp variable
 cumtemp_names <- c(
-  `-0.74763357574572` = "Low",
-  `0.337426897251082` = "Moderate",
-  `1.9042608`= "High"
+  `-0.74763357574572` = "Low heat stress",
+  `0.337426897251082` = "Moderate heat stress",
+  `1.9042608`= "High heat stress"
 )
 
+# "#055C9D", "#189AB4", "#75E6DA", "black"
 
-
-acr_prev_1size<-ggplot(data=post_out) + 
-  geom_point(aes(x=turb_mean_s,y=raw_mean,size=n), pch=21, fill="#027FDC", alpha=0.7, stroke=NA) +
-  scale_size(breaks=c(10,20,30), labels=c("10","20","30"), name="Number of corals")+
-  geom_errorbar(aes(x=turb_mean_s,ymin=down,ymax=up)) +
-  geom_point(aes(x=turb_mean_s,y=mean)) +
-  facet_grid(cols=vars(cumtemp), labeller = labeller(cumtemp  = as_labeller(cumtemp_names))) +
-  ylab("Mortality prevalence") +
-  xlab("% N") +
-  scale_x_continuous(breaks=c(0.45,0.5,0.55), limits=c(0.44,0.59))+
-  labs(title="Heat Stress", size=16)+
-  theme_classic()+
-  theme(plot.title = element_text(hjust = 0.5))+
-  theme(axis.text.x = element_text(colour="black", size=14), 
-        axis.text.y = element_text(colour="black", size=14))+
-  theme(axis.title.x=element_text(size=16), axis.title.y=element_text(size=16))+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  theme(axis.ticks = element_line(color="black"))+
-  theme(legend.text=element_text(size=16))+
-  theme(strip.background = element_rect(color="white", fill="white", linewidth=1.5))+ #facet background
-  theme(strip.text.x = element_text(size = 14))+ #facet text size
-  theme(aspect.ratio = 3/2)
-
-
-acr_prev_3size<-ggplot(data=post_out) + 
-  geom_point(aes(x=turb_mean_s,y=raw_mean,size=n), pch=21, fill="#027FDC", alpha=0.7, stroke=NA) +
-  scale_size(breaks=c(5,10,15,20,25), labels=c("5","10","15","20","25"), name="Number of corals")+
-  geom_errorbar(aes(x=turb_mean_s,ymin=down,ymax=up)) +
-  geom_point(aes(x=turb_mean_s,y=mean)) +
-  facet_grid(cols=vars(cumtemp), labeller = labeller(cumtemp  = as_labeller(cumtemp_names))) +
-  ylab("Mortality prevalence") +
-  xlab("% N") +
-  scale_x_continuous(breaks=c(0.45,0.5,0.55), limits=c(0.44,0.59))+
-  labs(title="Heat Stress", size=16)+
-  theme_classic()+
-  theme(plot.title = element_text(hjust = 0.5))+
-  theme(axis.text.x = element_text(colour="black", size=14), 
-        axis.text.y = element_text(colour="black", size=14))+
-  theme(axis.title.x=element_text(size=16), axis.title.y=element_text(size=16))+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  theme(axis.ticks = element_line(color="black"))+
-  theme(legend.text=element_text(size=16))+
-  theme(strip.background = element_rect(color="white", fill="white", linewidth=1.5))+ #facet background
-  theme(strip.text.x = element_text(size = 14))+ #facet text size
-  theme(aspect.ratio = 3/2)
-
-acr_prev_4size<-ggplot(data=post_out) + 
-  geom_point(aes(x=turb_mean_s,y=raw_mean,size=n), pch=21, fill="#027FDC", alpha=0.7, stroke=NA) +
-  scale_size(breaks=c(4,8,12), labels=c("4","8","12"), name="Number of corals")+
-  geom_errorbar(aes(x=turb_mean_s,ymin=down,ymax=up)) +
-  geom_point(aes(x=turb_mean_s,y=mean)) +
-  facet_grid(cols=vars(cumtemp), labeller = labeller(cumtemp  = as_labeller(cumtemp_names))) +
-  ylab("Mortality prevalence") +
-  xlab("% N") +
-  scale_x_continuous(breaks=c(0.45,0.5,0.55), limits=c(0.44,0.59))+
-  labs(title="Heat Stress", size=16)+
-  theme_classic()+
-  theme(plot.title = element_text(hjust = 0.5))+
-  theme(axis.text.x = element_text(colour="black", size=14), 
-        axis.text.y = element_text(colour="black", size=14))+
-  theme(axis.title.x=element_text(size=16), axis.title.y=element_text(size=16))+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  theme(axis.ticks = element_line(color="black"))+
-  theme(legend.text=element_text(size=16))+
-  theme(strip.background = element_rect(color="white", fill="white", linewidth=1.5))+ #facet background
-  theme(strip.text.x = element_text(size = 14))+ #facet text size
-  theme(aspect.ratio = 3/2)
+# acr_prev_1size<-ggplot(data=post_out) + 
+#   geom_point(aes(x=turb_mean_s,y=raw_mean,size=n), pch=21, fill="#75E6DA", alpha=0.7, stroke=NA) +
+#   scale_size(breaks=c(10,20,30), labels=c("10","20","30"), name="Number of corals")+
+#   geom_errorbar(aes(x=turb_mean_s,ymin=down,ymax=up)) +
+#   geom_point(aes(x=turb_mean_s,y=mean)) +
+#   facet_grid(cols=vars(cumtemp), labeller = labeller(cumtemp  = as_labeller(cumtemp_names))) +
+#   ylab("Mortality prevalence") +
+#   xlab(expression(paste("Nitrogen enrichment (% N in", italic("T. ornata"), ")")))+
+#   scale_x_continuous(breaks=c(0.45,0.5,0.55), limits=c(0.44,0.59))+
+#   #labs(title="Heat Stress", size=16)+
+#   theme_classic()+
+#   theme(plot.title = element_text(hjust = 0.5))+
+#   theme(axis.text.x = element_text(colour="black", size=14), 
+#         axis.text.y = element_text(colour="black", size=14))+
+#   theme(axis.title.x=element_text(size=14), axis.title.y=element_text(size=14))+
+#   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+#         panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+#   theme(axis.ticks = element_line(color="black"))+
+#   theme(legend.text=element_text(size=14))+
+#   theme(strip.background = element_rect(color="white", fill="white", linewidth=1.5))+ #facet background
+#   theme(strip.text.x = element_text(size = 14))+ #facet text size
+#   theme(aspect.ratio = 3/2)
+# 
+# 
+# acr_prev_3size<-ggplot(data=post_out) + 
+#   geom_point(aes(x=turb_mean_s,y=raw_mean,size=n), pch=21, fill="#189AB4", alpha=0.7, stroke=NA) +
+#   scale_size(breaks=c(5,15,25), labels=c("5","15","25"), name="Number of corals")+
+#   geom_errorbar(aes(x=turb_mean_s,ymin=down,ymax=up)) +
+#   geom_point(aes(x=turb_mean_s,y=mean)) +
+#   facet_grid(cols=vars(cumtemp), labeller = labeller(cumtemp  = as_labeller(cumtemp_names))) +
+#   ylab("Mortality prevalence") +
+#   xlab(expression(paste("Nitrogen enrichment (% N in", italic("T. ornata"), ")")))+
+#   scale_x_continuous(breaks=c(0.45,0.5,0.55), limits=c(0.44,0.59))+
+#   theme_classic()+
+#   theme(plot.title = element_text(hjust = 0.5))+
+#   theme(axis.text.x = element_text(colour="black", size=14), 
+#         axis.text.y = element_text(colour="black", size=14))+
+#   theme(axis.title.x=element_text(size=14), axis.title.y=element_text(size=14))+
+#   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+#         panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+#   theme(axis.ticks = element_line(color="black"))+
+#   theme(legend.text=element_text(size=14))+
+#   theme(strip.background = element_rect(color="white", fill="white", linewidth=1.5))+ #facet background
+#   theme(strip.text.x = element_text(size = 14))+ #facet text size
+#   theme(aspect.ratio = 3/2)
+# 
+# acr_prev_4size<-ggplot(data=post_out) + 
+#   geom_point(aes(x=turb_mean_s,y=raw_mean,size=n), pch=21, fill="#055C9D", alpha=0.7, stroke=NA) +
+#   scale_size(breaks=c(4,8,12), labels=c("4","8","12"), name="Number of corals")+
+#   geom_errorbar(aes(x=turb_mean_s,ymin=down,ymax=up)) +
+#   geom_point(aes(x=turb_mean_s,y=mean)) +
+#   facet_grid(cols=vars(cumtemp), labeller = labeller(cumtemp  = as_labeller(cumtemp_names))) +
+#   ylab("Mortality prevalence") +
+#   xlab(expression(paste("Nitrogen enrichment (% N in", italic("T. ornata"), ")")))+
+#   scale_x_continuous(breaks=c(0.45,0.5,0.55), limits=c(0.44,0.59))+
+#   theme_classic()+
+#   theme(plot.title = element_text(hjust = 0.5))+
+#   theme(axis.text.x = element_text(colour="black", size=14), 
+#         axis.text.y = element_text(colour="black", size=14))+
+#   theme(axis.title.x=element_text(size=14), axis.title.y=element_text(size=14))+
+#   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+#         panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+#   theme(axis.ticks = element_line(color="black"))+
+#   theme(legend.text=element_text(size=14))+
+#   theme(strip.background = element_rect(color="white", fill="white", linewidth=1.5))+ #facet background
+#   theme(strip.text.x = element_text(size = 14))+ #facet text size
+#   theme(aspect.ratio = 3/2)
+# 
+# ## the figure for the manuscript
+# acr_prev<-ggplot(data=post_out) + 
+#   geom_point(aes(x=turb_mean_s,y=raw_mean,size=n/3), pch=21, fill="#027FDC", alpha=0.7, stroke=NA) +
+#   scale_size(breaks=c(5,10,15), labels=c("15","30","45"), name="Number of corals")+
+#   geom_errorbar(aes(x=turb_mean_s,ymin=down,ymax=up)) +
+#   geom_point(aes(x=turb_mean_s,y=mean)) +
+#   facet_grid(cols=vars(cumtemp), labeller = labeller(cumtemp  = as_labeller(cumtemp_names))) +
+#   ylab("Mortality prevalence") +
+#   xlab("Total N") +
+#   scale_x_continuous(breaks=c(0.45,0.5,0.55), limits=c(0.44,0.59))+
+#   labs(title="Heat Stress", size=16)+
+#   theme_classic()+
+#   theme(plot.title = element_text(hjust = 0.5))+
+#   theme(axis.text.x = element_text(colour="black", size=14), 
+#         axis.text.y = element_text(colour="black", size=14))+
+#   theme(axis.title.x=element_text(size=16), axis.title.y=element_text(size=16))+
+#   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+#         panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+#   theme(axis.ticks = element_line(color="black"))+
+#   theme(legend.text=element_text(size=16))+
+#   theme(strip.background = element_rect(color="white", fill="white", linewidth=1.5))+ #facet background
+#   theme(strip.text.x = element_text(size = 14))+ #facet text size
+#   theme(aspect.ratio = 3/2)
+# ggsave("figs/acr_prev.pdf", width=10, height=5, units="in")
+# #fill="#027FDC"
+# 
+# acr_int_3sizes<-cowplot::plot_grid(acr_prev_1size, acr_prev_3size, acr_prev_4size, labels=c('A','B','C'), ncol=1)
+# ggsave("figs/acr_int_3sizes.pdf", width=10, height=15, units="in")
 
 acr_prev_allSize<-ggplot(data=post_out) + 
-  geom_point(aes(x=turb_mean_s,y=raw_mean,size=n), pch=21, fill="#027FDC", alpha=0.7, stroke=NA) +
-  scale_size( name="Number of corals")+
+  geom_point(aes(x=turb_mean_s,y=raw_mean, size=n), pch=21, fill="gray", alpha=0.7, stroke=NA) +
+  scale_size(name="Number of corals", breaks=c(10,30,50))+
   geom_errorbar(aes(x=turb_mean_s,ymin=down,ymax=up)) +
   geom_point(aes(x=turb_mean_s,y=mean)) +
   facet_grid(cols=vars(cumtemp), labeller = labeller(cumtemp  = as_labeller(cumtemp_names))) +
   ylab("Mortality prevalence") +
-  xlab("Total N") +
+  xlab(expression(paste("Nitrogen enrichment (% N in", italic("T. ornata"), ")")))+
   scale_x_continuous(breaks=c(0.45,0.5,0.55), limits=c(0.44,0.59))+
-  labs(title="Heat Stress", size=16)+
   theme_classic()+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(axis.text.x = element_text(colour="black", size=14), 
         axis.text.y = element_text(colour="black", size=14))+
-  theme(axis.title.x=element_text(size=16), axis.title.y=element_text(size=16))+
+  theme(axis.title.x=element_text(size=14), axis.title.y=element_text(size=14))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))+
   theme(axis.ticks = element_line(color="black"))+
-  theme(legend.text=element_text(size=16))+
+  theme(legend.text=element_text(size=14))+
   theme(strip.background = element_rect(color="white", fill="white", linewidth=1.5))+ #facet background
   theme(strip.text.x = element_text(size = 14))+ #facet text size
   theme(aspect.ratio = 3/2)
-
-
-## the figure for the manuscript
-acr_prev<-ggplot(data=post_out) + 
-  geom_point(aes(x=turb_mean_s,y=raw_mean,size=n/3), pch=21, fill="#027FDC", alpha=0.7, stroke=NA) +
-  scale_size(breaks=c(5,10,15), labels=c("15","30","45"), name="Number of corals")+
-  geom_errorbar(aes(x=turb_mean_s,ymin=down,ymax=up)) +
-  geom_point(aes(x=turb_mean_s,y=mean)) +
-  facet_grid(cols=vars(cumtemp), labeller = labeller(cumtemp  = as_labeller(cumtemp_names))) +
-  ylab("Mortality prevalence") +
-  xlab("Total N") +
-  scale_x_continuous(breaks=c(0.45,0.5,0.55), limits=c(0.44,0.59))+
-  labs(title="Heat Stress", size=16)+
-  theme_classic()+
-  theme(plot.title = element_text(hjust = 0.5))+
-  theme(axis.text.x = element_text(colour="black", size=14), 
-        axis.text.y = element_text(colour="black", size=14))+
-  theme(axis.title.x=element_text(size=16), axis.title.y=element_text(size=16))+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  theme(axis.ticks = element_line(color="black"))+
-  theme(legend.text=element_text(size=16))+
-  theme(strip.background = element_rect(color="white", fill="white", linewidth=1.5))+ #facet background
-  theme(strip.text.x = element_text(size = 14))+ #facet text size
-  theme(aspect.ratio = 3/2)
-ggsave("figs/acr_prev.pdf", width=10, height=5, units="in")
-#fill="#027FDC"
-
-acr_int_3sizes<-cowplot::plot_grid(acr_prev_1size, acr_prev_3size, acr_prev_4size, labels=c('A','B','C'), ncol=1)
-ggsave("figs/acr_int_3sizes.pdf", width=10, height=15, units="in")
+ggsave("figs/acr_prev_allSize.pdf", width=8, height=5, units="in")
 
 #### --------------------- Pocillopora Severity: Heat x N interaction ------------------### 
 
@@ -347,9 +346,9 @@ post_out <- post_out %>% left_join(raw_out, by='site_index_reset')
 
 #creating names for cumulative temp variable
 cumtemp_names <- c(
-  `-0.74763357574572` = "Low",
-  `0.337426897251082` = "Moderate",
-  `1.9042608`= "High"
+  `-0.74763357574572` = "Low heat stress",
+  `0.337426897251082` = "Moderate heat stress",
+  `1.9042608`= "High heat stress"
 )
 
 
@@ -361,21 +360,20 @@ poc_sev_int<-ggplot(data=post_out) +
   geom_point(aes(x=turb_mean_s,y=mean)) +
   facet_grid(cols=vars(cumtemp), labeller = labeller(cumtemp  = as_labeller(cumtemp_names))) +
   ylab("Mortality severity") +
-  xlab("% N") +
+  xlab(expression(paste("Nitrogen enrichment (% N in", italic("T. ornata"), ")")))+
   scale_x_continuous(breaks=c(0.45,0.5,0.55), limits=c(0.44,0.59))+
-  labs(title="Heat Stress", size=16)+
   theme_classic()+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(axis.text.x = element_text(colour="black", size=14), 
         axis.text.y = element_text(colour="black", size=14))+
-  theme(axis.title.x=element_text(size=16), axis.title.y=element_text(size=16))+
+  theme(axis.title.x=element_text(size=14), axis.title.y=element_text(size=14))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))+
   theme(axis.ticks = element_line(color="black"))+
-  theme(legend.text=element_text(size=16))+
+  theme(legend.text=element_text(size=14))+
   theme(strip.background = element_rect(color="white", fill="white", linewidth=1.5))+ #facet background
   theme(strip.text.x = element_text(size = 14))+ #facet text size
   theme(aspect.ratio = 3/2)
-ggsave("figs/poc_sev_int.pdf", width=8, height=4.5, units="in")
+ggsave("figs/poc_sev_int.pdf", width=8, height=5, units="in")
 
 
