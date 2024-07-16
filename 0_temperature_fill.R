@@ -1,10 +1,12 @@
 
 #   -----------------------------------------------------------------------
-# Fill in missing temperatures using bayes imputation
+# Fill in missing temperatures using linear models
+# Plots figure 1a,b
 #   -----------------------------------------------------------------------
 
 # Some loggers were missing in 2019, but we have timeseries going back to 2005 and patterns among sites are highly correlated (>0.97). Using existing data we impute the missing data. 
 
+library(plyr)
 library(dplyr)
 library(tidyr)
 library(lubridate)
@@ -12,6 +14,7 @@ library(rjags)
 library(ggplot2)
 library(RcppRoll)
 library(ggpubr)
+library(scales)
 
 # data --------------------------------------------------------------------
 
@@ -366,9 +369,8 @@ temp_bak_cumheat %>%
   ylab('Cumulative Heat stress 2019')
 
 
-
-
 # predict old heat stress events? -----------------------------------------
+
 ## LTER02 data were missing in 2006-7
 
 # predicting for one backreef site using data from 4 other backreef sites with data in 2007
@@ -545,8 +547,7 @@ ggsave("figs/real_predicted_temps_2007.pdf", width=8, height=4, units="in")
 
 
 
-
-# create dataframe to export ----------------------------------------------
+#-------------------- create dataframe to export ----------------------------------------------
 
 bak_out <- temp_bak_cumheat %>% 
   group_by(site) %>% 
@@ -564,5 +565,135 @@ write.csv(out, 'data/water_temp/cumulative_heatstress_2019_bysite_filled.csv', r
 write.csv(temp_bak_wide %>% select(day,starts_with('LTER'),starts_with('fill')),"data/water_temp/backreef_filled_temperature.csv",row.names=F)
 
 
+#-------------------- plot figures ----------------------------------------------
+
+# use temp_bak_long dataframe. give it a new name
+thermTemp<-temp_bak_long
+
+#changing "day" to date because we need a numaric variable for day
+names(thermTemp)[names(thermTemp) == 'day'] <- 'date'
+
+thermTemp$date_use<-thermTemp$date
+thermTemp$date_use<-as.Date(thermTemp$date_use,'%Y-%m-%d')
+
+# format time and date
+thermTemp$day_mo_yr <- format(thermTemp$date_use, '%Y-%m-%d')
+thermTemp$day <- format(thermTemp$date_use, '%d')
+thermTemp$month <- format(thermTemp$date_use, '%m')
+thermTemp$year <- format(thermTemp$date_use, '%y') 
+
+thermTemp$day<-as.factor(thermTemp$day)
+thermTemp$month<-as.factor(thermTemp$month)
+thermTemp$year<-as.factor(thermTemp$year)
+thermTemp$date_use<-as.Date(thermTemp$date_use, "%m/%d/%y")
+
+# creating a new df with only data up to July 31 2018. this will become the mean line and SD
+thermTemp_toAug2018<-subset(thermTemp, date_use<"2018-08-01")
+thermTemp_mean<-ddply(thermTemp_toAug2018, .(day, month), summarize,
+                      mean_daily_temp=mean(temp_c),
+                      sd=sd(temp_c))
+#creating a factor column for this year
+thermTemp_mean$timeframe<-as.factor("mean")
+#creating a new factor column just for plotting purposes. August-December we will call 2018, Jan-July we will call 2019
+#this is just to make them plot in the correct order on this plot 
+thermTemp_mean$year<-as.factor(ifelse(thermTemp_mean$month=="08"|thermTemp_mean$month=="09"|
+                                        thermTemp_mean$month=="10"|thermTemp_mean$month=="11"|thermTemp_mean$month=="12", "2018", "2019"))
+
+thermTemp_mean$date<- as.Date(with(thermTemp_mean, paste(month, day, year,sep="-")), format="%m-%d-%Y")
+thermTemp_mean<-thermTemp_mean[, c("day","month","year","date","mean_daily_temp","sd","timeframe")]
+
+# subsetting data from August 2018 to July 2019. this will become the line for the high thermal stress year
+thermTemp_2019<-subset(thermTemp, date_use>="2018-08-01" & date_use<="2019-07-31")
+
+thermTemp_2019_mean<-ddply(thermTemp_2019, .(day, month, year, date), summarize,
+                                 mean_daily_temp=mean(temp_c),
+                                 sd=sd(temp_c))
+
+#creating a factor column for this year
+thermTemp_2019_mean$timeframe<-as.factor("2018to2019")
+
+thermTemp_2019_mean$year<-as.factor(ifelse(thermTemp_2019_mean$month=="08"|thermTemp_2019_mean$month=="09"|
+                                             thermTemp_2019_mean$month=="10"|thermTemp_2019_mean$month=="11"|thermTemp_2019_mean$month=="12", "2018", "2019"))
+
+thermTemp_mean_and_2019<-rbind(thermTemp_2019_mean, thermTemp_mean)
+
+# temps2019 <-
+#   tidyr::separate(
+#     data = temperature.day.2019.mean,
+#     col = monthday,
+#     sep = "-",
+#     into=c("month", "day"),
+#     remove = TRUE
+#   )
+# 
+# temps2019<-temps2019[,c(1,3,4,2,5,6,7)]
+# 
+# longterm.temps<-thermTemp_mean[,c(7,1,2,3,4,5,6)]
+# 
+# names(longterm.temps)[names(longterm.temps)=="mean_daily_temp"]<-"mean_temp_c"
+# 
+# temps<-rbind(temps2019, longterm.temps)
+
+temp_patterns<-ggplot(thermTemp_mean_and_2019, aes(x=date, y=mean_daily_temp, fill=timeframe))+
+  geom_hline(yintercept=29, linetype=2, color="#8B8B8B")+
+  geom_ribbon(aes(ymin=mean_daily_temp - sd, ymax=mean_daily_temp + sd), alpha=.2)+
+  geom_line(aes(y=mean_daily_temp, color=timeframe))+
+  scale_color_manual(values=c("#FA3405","#05CBFA"), labels=c("August 2018 - July 2019", "mean through July 2018"))+
+  scale_fill_manual(values=c("#FA3405","#05CBFA"), labels=c("August 2018 - July 2019", "mean through July 2018"))+
+  scale_x_date(breaks = date_breaks("months"),labels = date_format("%b"))+
+  labs(x="", y=expression("Temperature " ( degree*C)))+
+  theme_classic()+
+  theme(axis.text.x = element_text(colour="black", angle=-45, size=14, hjust=0), 
+        axis.text.y = element_text(colour="black", size=14))+
+  theme(axis.title=element_text(size=14))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+  theme(legend.position = c(0.25,0.92), legend.title = element_blank(), legend.text=element_text(size=10))+ 
+  theme(aspect.ratio = 3/4)
 
 
+# simple stats for temperature and heat stress ----------------------------------------------
+
+temp_bak_cumheat_sub<-temp_bak_cumheat
+# binary column, 1 for days >29C, 0 for days <29
+temp_bak_cumheat_sub$over29<-ifelse(temp_bak_cumheat_sub$temp_c > 29, 1, 0)
+temp_bak_cumheat_sub$date <- as.Date(temp_bak_cumheat_sub$date, '%Y-%m-%d')
+temp_bak_cumheat_sub$site<-as.factor(temp_bak_cumheat_sub$site)
+temp_bak_cumheat_sub$site<-factor(temp_bak_cumheat_sub$site)
+#subsetting to include only the exact first and last day above 29. temp measured to .000
+temp_bak_cumheat_sub <-  filter(temp_bak_cumheat_sub, date >= '2018-07-31' & date <= '2019-08-01') 
+temp_bak_cumheat_sub$week<-as.factor(temp_bak_cumheat_sub$week)
+temp_bak_cumheat_sub$week<-factor(temp_bak_cumheat_sub$week)
+
+temp_bak_cumheat_sub_sum<-temp_bak_cumheat_sub %>% group_by(week) %>% 
+  summarise(temp_c_mean = mean(temp_c), over_29=sum(over29), cum_heat_mean=mean(cum_heat)) %>% ungroup()
+
+
+temp_sum_day <- temp_bak_cumheat_sub %>% group_by(site) %>% summarise(temp_c_mean = mean(temp_c), over_29=sum(over29)) %>% ungroup()
+
+sum(temp_bak_cumheat_sub$over29) #number of days >29 during the heatwave: 115
+length(temp_bak_cumheat_sub$over29) #total number of days in this window: 139
+temp_bak_cumheat_sub_longest<-filter(temp_bak_cumheat_sub, day >= '2019-02-28' & day <= '2019-05-01')
+length(lter.day.sub.longest$over29) #consecutive days over 29: 63
+
+
+heat_stress<-ggplot(temp_bak_cumheat_sub) + 
+  geom_line(aes(x=date,y=cum_heat,color=Site),lwd=1)  + 
+  theme_classic() +
+  scale_x_date(breaks = date_breaks("months"),labels = date_format("%b"))+
+  scale_color_manual(labels = c("LTER 1", "LTER 2", "LTER 3", "LTER 4", "LTER 5", "LTER 6"), 
+                     values=c( "#A5E300", "#BF047E", "#F26389", "#6B6B9D","#06BFAD","#15266B"))+
+  xlab('') +
+  ylab('Cumulative Heat stress')+
+  theme_classic()+
+  theme(axis.text.x = element_text(colour="black", angle=-45, size=14, hjust=0), 
+        axis.text.y = element_text(colour="black", size=14))+
+  theme(axis.title=element_text(size=14))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+  theme(legend.position = c(0.15,0.73), legend.text=element_text(size=10), legend.title=element_blank())+ 
+  theme(aspect.ratio = 3/4)
+
+
+temp_figure<-cowplot::plot_grid(temp_patterns, heat_stress, nrow = 2, align="vh", labels=c("(a)", "(b)"))
+ggsave("figs/temp_figure.pdf", width=5.5, height=8, units="in")
