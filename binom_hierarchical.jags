@@ -1,0 +1,78 @@
+model{
+    # nutrient model
+    for(i in 1:N){
+      y_turb[i] ~ dnorm(g_turb[i],tau_turb)
+      g_turb[i] <- mu_turb_site[site_turb[i]]
+      y_turb_new[i] ~ dnorm(g_turb[i],tau_turb)
+    }
+    tau_turb ~ dgamma(0.1,0.1)
+    sigma_turb <- 1/sqrt(tau_turb)
+
+    for(j in 1:P){
+      mu_turb_site[j] ~ dnorm(mu_turb_bar, tau_turb_bar)
+    }
+    mu_turb_bar ~ dnorm(0,0.01)
+    tau_turb_bar ~ dexp(1)
+    sigma_turb_bar <- 1/sqrt(tau_turb_bar)
+
+    # Colony - prevalence 
+    for(i in 1:n){
+      y[i] ~ dbern(mu[i])
+      logit(mu[i]) <- B0_p[point[i]] + beta_colony_depth*X_colony[i,1]
+      y.new[i] ~ dbern(mu[i]) 
+    }
+    
+    beta_colony_depth ~ dnorm(0,0.01)
+    
+    # Point - prevalence
+    for(p in 1:P){
+      B0_p[p] ~ dnorm(g_p[p],tau_point_p)
+      g_p[p] <- mu_overall_p + beta_cumheat*cum_heat[p] + beta_N*mu_turb_site[p] + beta_cumheat_X_N*cum_heat[p]*mu_turb_site[p]
+      
+      B0.new_p[p] ~ dnorm(g_p[p],tau_point_p) # posterior predictive distribution of B0 for plotting
+    }
+
+    beta_cumheat ~ dnorm(0,0.01)
+    beta_N ~ dnorm(0,0.01)
+    beta_cumheat_X_N ~ dnorm(0,0.01)
+    sigma_point_p ~ dunif(0,50)
+    tau_point_p <- pow(sigma_point_p,-2) 
+    
+    # overall - prevelence
+    mu_overall_p ~ dnorm(0,0.01)
+    
+    # Posterior predictive checks
+    y.mean <- mean(y)
+    ynew.mean <- mean(y.new)
+    pval.mean <- step(y.mean-ynew.mean)
+    
+    sd.y <- sd(y)
+    sd.y.new <- sd(y.new)
+    pval.sd <- step(sd.y.new-sd.y)
+
+    #cv.y <- sd(y)/mean(y)
+    #cv.y.new <- sd(y.new)/mean(y.new)
+    #pval.cv <- step(cv.y.new - cv.y)
+    
+    for(i in 1:n){
+      sq[i] <- (y[i] - mu[i])^2
+      sq.new[i] <- (y.new[i] - mu[i])^2
+    }
+    fit <- sum(sq)
+    fit.new <- sum(sq.new)
+    pval.fit <- step(fit.new - fit)
+    
+    min.y <- min(y)
+    min.y.new <- min(y.new)
+    pval.min <- step(min.y.new - min.y)
+    
+    max.y <- max(y)
+    max.y.new <- max(y.new)
+    pval.max <- step(max.y.new - max.y)
+     
+    # R-squared
+    varF <- sd(y)^2
+    varE <- sd(y - y.new)^2
+    R2 <- varF/(varF+varE)
+
+    }  
