@@ -15,6 +15,7 @@ library(ggplot2)
 library(RcppRoll)
 library(ggpubr)
 library(scales)
+library(RcppRoll)
 
 # data --------------------------------------------------------------------
 
@@ -684,7 +685,7 @@ heat_stress<-ggplot(temp_bak_cumheat_sub) +
   scale_color_manual(labels = c("LTER 1", "LTER 2", "LTER 3", "LTER 4", "LTER 5", "LTER 6"), 
                      values=c( "#A5E300", "#BF047E", "#F26389", "#6B6B9D","#06BFAD","#15266B"))+
   xlab('') +
-  ylab('Cumulative Heat stress')+
+  ylab('Cumulative Heat Stress Weeks')+
   theme_classic()+
   theme(axis.text.x = element_text(colour="black", angle=-45, size=14, hjust=0), 
         axis.text.y = element_text(colour="black", size=14))+
