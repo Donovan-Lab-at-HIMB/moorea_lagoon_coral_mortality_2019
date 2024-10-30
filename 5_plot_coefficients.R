@@ -1,7 +1,6 @@
 library(ggplot2)
 library(cowplot)
 
-### 
 ##----------------------------- Pocillopora Prevalence -----------------------------
 
 #inputting results from the model
@@ -30,6 +29,8 @@ prev_poc<-subset(prev_poc, factor_name!="beta_colony_depth")
 prev_poc$factor_name<-factor(prev_poc$factor_name, levels=c("beta_cumheat_X_N","beta_cumheat","beta_N"))
 prev_poc$Size<-factor(prev_poc$Size, levels=c("Size4","Size3","Size1and2","All"))
 
+#old red palette w/black: "#B8190F", "#FE5F55", "#FF9086", "black"
+
 prevalence_poc<-ggplot()+
   geom_vline(xintercept=0, linetype="dashed", color="darkgray")+
   geom_errorbar(data=prev_poc, aes(x=beta, y=factor_name, color=Size, xmin=beta_down95, xmax=beta_up95, width = 0), position = position_dodge(0.75),lineend="round")+
@@ -39,9 +40,9 @@ prevalence_poc<-ggplot()+
   xlab("Effect")+
   ylab("")+
   scale_y_discrete(labels = c("Heat stress x \nNitrogen enrichment", "Heat stress", "Nitrogen enrichment"))+
-  scale_color_manual(values = c("#B8190F", "#FE5F55", "#FF9086", "black"), guide = guide_legend(reverse = TRUE),
+  scale_color_manual(values = c("#6AFC90", "#47C367", "#238B3E", "#005215"), guide = guide_legend(reverse = TRUE),
                      labels = c("30+ cm", "20-29 cm","5-19 cm","All"))+
-  scale_fill_manual(values = c("#B8190F", "#FE5F55", "#FF9086", "black"), guide = guide_legend(reverse = TRUE),
+  scale_fill_manual(values = c("#6AFC90", "#47C367", "#238B3E", "#005215"), guide = guide_legend(reverse = TRUE),
                      labels = c("30+ cm", "20-29 cm","5-19 cm","All"))+
   theme_classic()+
   theme(plot.title = element_text(hjust = 0.5))+
@@ -83,6 +84,9 @@ prev_acr<-subset(prev_acr, factor_name!="beta_colony_depth")
 prev_acr$factor_name<-factor(prev_acr$factor_name, levels=c("beta_cumheat_X_N","beta_cumheat","beta_N"))
 prev_acr$Size<-factor(prev_acr$Size, levels=c("Size4","Size3","Size1and2","All"))
 
+# old blue gradient w/black: "#055C9D", "#189AB4", "#75E6DA", "black"
+# "#75E6DA", "#50B8C6", "#2A8AB1", "#055C9D"
+
 prevalence_acr<-ggplot()+
   geom_vline(xintercept=0, linetype="dashed", color="darkgray")+
   geom_errorbar(data=prev_acr, aes(x=beta, y=factor_name, color=Size, xmin=beta_down95, xmax=beta_up95, width = 0), position = position_dodge(0.75),lineend="round")+
@@ -92,9 +96,9 @@ prevalence_acr<-ggplot()+
   xlab("Effect")+
   ylab("")+
   scale_y_discrete(labels = c("", "", ""))+
-  scale_color_manual(values = c("#055C9D", "#189AB4", "#75E6DA", "black"), guide = guide_legend(reverse = TRUE),
+  scale_color_manual(values = c("#00D4FF", "#01A0CB", "#016D96", "#023962"), guide = guide_legend(reverse = TRUE),
                      labels = c("60+ cm", "30-59 cm","5-29 cm","All"))+
-  scale_fill_manual(values = c("#055C9D", "#189AB4", "#75E6DA", "black"), guide = guide_legend(reverse = TRUE),
+  scale_fill_manual(values = c("#00D4FF", "#01A0CB", "#016D96", "#023962"), guide = guide_legend(reverse = TRUE),
                      labels = c("60+ cm", "30-59 cm","5-29 cm","All"))+
   theme_classic()+
   theme(plot.title = element_text(hjust = 0.5))+
@@ -131,15 +135,17 @@ sev_poc$Size<-factor(sev_poc$Size, levels=c("All"))
 
 severity_poc<-ggplot(sev_poc, aes(x=beta, y=factor_name, color=Size))+
   geom_vline(xintercept=0, linetype="dashed", color="darkgray")+
-  geom_point(position = position_dodge(0.75), size=3)+
   geom_errorbar(position = position_dodge(0.75),aes(xmin=beta_down95, xmax=beta_up95, width = 0),lineend="round")+
   geom_errorbar(position = position_dodge(0.75),aes(xmin=beta_down80, xmax=beta_up80, width = 0), size=1.75, lineend="round")+
+  geom_point(aes(fill=Size), position = position_dodge(0.75), size=3, shape=21, color="black")+
   #ggtitle(expression(italic("Pocillopora")))+
   ggtitle(expression(paste(italic("Pocillopora"), " mortality severity")))+
   xlab("Effect")+
   ylab("")+
   scale_y_discrete(labels = c("Heat stress x \nNitrogen enrichment", "Heat stress", "Nitrogen enrichment"))+
-  scale_color_manual(values = c("black"), guide = guide_legend(reverse = TRUE),
+  scale_color_manual(values = c("#005215"), guide = guide_legend(reverse = TRUE),
+                     labels = c("All"))+
+  scale_fill_manual(values = c("#005215"), guide = guide_legend(reverse = TRUE),
                      labels = c("All"))+
   theme_classic()+
   theme(plot.title = element_text(hjust = 0.5))+
@@ -177,15 +183,17 @@ sev_acr$Size<-factor(sev_acr$Size, levels=c("All"))
 
 severity_acr<-ggplot(sev_acr, aes(x=beta, y=factor_name, color=Size))+
   geom_vline(xintercept=0, linetype="dashed", color="darkgray")+
-  geom_point(position = position_dodge(0.75), size=3)+
   geom_errorbar(position = position_dodge(0.75),aes(xmin=beta_down95, xmax=beta_up95, width = 0),lineend="round")+
   geom_errorbar(position = position_dodge(0.75),aes(xmin=beta_down80, xmax=beta_up80, width = 0), size=1.75, lineend="round")+
+  geom_point(aes(fill=Size), position = position_dodge(0.75), size=3, shape=21, color="black")+
   #ggtitle(expression(italic("Acropora")))+
   ggtitle(expression(paste(italic("Acropora"), " mortality severity")))+
   xlab("Effect")+
   ylab("")+
   scale_y_discrete(labels = c("", "", ""))+
-  scale_color_manual(values = c("black"), guide = guide_legend(reverse = TRUE),
+  scale_color_manual(values = c("#023962"), guide = guide_legend(reverse = TRUE),
+                     labels = c("All"))+
+  scale_fill_manual(values = c("#023962"), guide = guide_legend(reverse = TRUE),
                      labels = c("All"))+
   theme_classic()+
   theme(plot.title = element_text(hjust = 0.5))+
@@ -203,26 +211,10 @@ severity_acr<-ggplot(sev_acr, aes(x=beta, y=factor_name, color=Size))+
 
 ##----------------------------- Plots -----------------------------
 
-# #Prevalence
-# prev_title <- ggdraw() + draw_label("Mortality Prevalence", fontface='bold')
-# prev_plots<-cowplot::plot_grid(prevalence_poc, prevalence_acr, ncol=2, align="v",  labels=c('(a)', '(b)'))
-# #prevalence_plot<-cowplot::plot_grid(prev_title, prev_plots, ncol=1, rel_heights=c(0.1, 1))
-# #ggsave("figs/mortality_prevalence_plot.pdf", width=12, height=6, units="in")
-# 
-# #Severity
-# sev_title <- ggdraw() + draw_label("Mortality Severity", fontface='bold')
-# sev_plots<-cowplot::plot_grid(severity_poc, severity_acr, ncol=2, align="v",  labels=c('(c)', '(d)'))
-# #severity_plot<-cowplot::plot_grid(sev_title, sev_plots, ncol=1, rel_heights=c(0.1, 1))
-# #ggsave("figs/mortality_severity_plot.pdf", width=12, height=6, units="in")
-# 
-# ## together as one plot
-# poc_acr_prev_sev_plot<-cowplot::plot_grid(prev_title, prev_plots, ncol=1, sev_title, sev_plots, rel_heights=c(0.1, 1, 0.1, 0.5))
-# ggsave("figs/poc_acr_prev_sev_plot.pdf", width=12, height=9, units="in")
-
 
 poc_plots<-cowplot::plot_grid(prevalence_poc, severity_poc, ncol=1, align="vh",rel_heights=c(1 ,0.5), labels=c('(a)', '(c)'))
 acr_plots<-cowplot::plot_grid(prevalence_acr, severity_acr, ncol=1, align="vh",rel_heights=c(1 ,0.5), labels=c('(b)', '(d)'))
 
 poc_acr_prev_sev_plot<-cowplot::plot_grid(poc_plots, acr_plots, rel_widths=c(1,0.7), align='h')
-ggsave("figs/poc_acr_prev_sev_plot_2.pdf", width=12, height=10, units="in")
+ggsave("figs/poc_acr_prev_sev_plot_3.pdf", width=12, height=10, units="in")
 
