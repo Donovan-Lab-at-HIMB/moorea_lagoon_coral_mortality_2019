@@ -14,7 +14,7 @@ mod_version <- "Nsubmodel"
 mod_version_jags <- "binom_hierarchical.jags"
 distgo <- "prev"
 out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-mod_date <- "2024-05-24"
+mod_date <- "2024-10-30" # put the date you ran the model here
 
 mod <- readRDS(paste0('model_out/',distgo,'_',genus,'_',response,'_',size_class,'Size_',mod_date,'_',mod_version,'.Rdata'))
 

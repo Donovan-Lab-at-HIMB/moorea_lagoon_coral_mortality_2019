@@ -1,4 +1,5 @@
-genus <- "Pocillopora"
+
+genus <- "Acropora"
 size_class <- "all"
 response <- "Percent_dead"
 mod_version <- "Nsubmodel" #what the data is going to be called when exported
@@ -8,7 +9,7 @@ library(dplyr)
 library(rjags)
 library(parallel)
 
-data_expanded <- read.csv("data/final_model_inputs/data_expanded.csv")
+data_expanded <- read.csv("data/final_model_inputs/mortality_data.csv")
 turb_N_allYears <- read.csv("data/final_model_inputs/turb_all_years.csv")
 
 # prep model input --------------------------------------------------------
@@ -20,17 +21,10 @@ prev_mod_data <- data_expanded %>%
   filter(!is.na(Depth)) %>% 
   filter(!is.na(Size.class)) 
 
-# REMOVE FRINGING REEF DATA
-prev_mod_data <- prev_mod_data %>% 
-  filter(Habitat_go=='Lagoon')
-
 # subset size class
 if(is.numeric(size_class)==TRUE){prev_mod_data <- prev_mod_data %>% filter(Size.class==size_class)}
 prev_mod_data$Size.class <- ifelse(prev_mod_data$Size.class==1|prev_mod_data$Size.class==2,1,prev_mod_data$Size.class)
 
-# remove 6 sites that aren't in the turbinara compiled data
-prev_mod_data <- prev_mod_data %>% 
-  filter(!grepl("LTER",Site))
 
 y <- prev_mod_data$response
 y_p <- ifelse(y > 0, 1, 0)
@@ -43,7 +37,7 @@ B <- ncol(x_colony)
 
 
 # point level preds
-site_preds <- prev_mod_data %>% group_by(site_index) %>% summarise(cumtemp=unique(max_heatstress),habitat=unique(Habitat_go),coast=unique(Island_shore))
+site_preds <- prev_mod_data %>% group_by(site_index) %>% summarise(cumtemp=unique(max_heatstress))
 site_preds$cumtemp_scale <- scale(site_preds$cumtemp)[,1]
 site_preds$site_index_reset <- seq(1:nrow(site_preds))
 
@@ -63,17 +57,14 @@ write.csv(prev_mod_data,paste0("model_out/",mod_version,"/",response,"/prev","_"
 write.csv(site_preds,paste0("model_out/",mod_version,"/",response,"/prev","_",genus,"_",size_class,"Size_site_data_in.csv"))
 
 # model parameters --------------------------------------------------------
-# we don't know why these numbers are here, not mary's typical style. reminding ourselves what the dimensions of these should be
+# #commented numbers for reminding ourselves what the dimensions of these should be
 jd <- list(B=B, #2
            y=y_p, #[n]
            n=length(y_p), #3737
            X_colony=x_colony, #[n,B]
            point=point, #[n]
            P=length(unique(point)), #49
-           #habitat=as.numeric(as.factor(as.character(site_preds$habitat))), #[n] (1 level)
            cum_heat=site_preds$cumtemp_scale, #[P]
-           #K=length(unique(site_preds$habitat)), #1
-           coast=as.numeric(as.factor(as.character(site_preds$coast))), #[P]
            M=3,
            prior.scale = 10,
            
@@ -89,11 +80,9 @@ nXcol <- ncol(x_colony)
 initFunc <- function(){return(list(
   beta_colony_p=rnorm(nXcol,0,1),
   sigma_point_p=runif(1,0,20),
-  # sigma_habitat_p=runif(1,0,20),
-  # sigma_coast_p=runif(1,0,1),
   beta_N =0,
   beta_cumheat=0,
-  beta_cumheat_X_N=-1.5, #previously was commented out and  beta_cumheat_X_N=0,
+  beta_cumheat_X_N=-1.5, 
   mu_turb_bar=rnorm(1,0,0.5),
   mu_turb_site=rnorm(nP,0,0.5),
   tau_turb_bar=rgamma(1,0.1,0.1),
@@ -105,11 +94,7 @@ n.adapt <- 1000; n.update <- 20000; n.iter <- 20000
 # run model - prevalence --------------------------------------------------
 # run chains in parallel
 cl <- makeCluster(3) # this determines the number of chains, must be less than the number of cores on computer
-# telling your computer to run this three different times on three different portions of your computer
-# then paste them back together
-# some thing has changed either in R or in JAGS and mary can no longer run jags models like this
-# mary is getting exact same things 3 times. chains are perfectly correlated
-# mary's current work around for more simple models, comment out line 112-121, 131-132, and then change number of chains to 3. posterior will be zmCore
+
 clusterExport(cl, c('jd','n.adapt','n.update','n.iter','initFunc','nXcol','nP','mod_version_jags'))
 
 out <- clusterEvalQ(cl,{
@@ -132,6 +117,3 @@ stopCluster(cl)
 saveRDS(zmPrp, paste0('model_out/prev_',genus,'_',response,'_',size_class,'Size_',Sys.Date(),'_',mod_version,'.Rdata'))
 
 
-# notes -------------------------------------------------------------------
-
-# remove habitat since we are only using lagoon data? KES Done

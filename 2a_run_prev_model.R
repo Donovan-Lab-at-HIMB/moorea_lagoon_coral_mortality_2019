@@ -1,5 +1,5 @@
 for(i in c(1,3,4)){
-  genus <- "Acropora"
+  genus <- "Acropora" #change to "Acropora" or "Pocillopora" and rerun
   size_class <- i
   response <- "Percent_dead"
   mod_version <- "Nsubmodel"
@@ -9,7 +9,7 @@ for(i in c(1,3,4)){
   library(rjags)
   library(parallel)
   
-  data_expanded <- read.csv("data/final_model_inputs/data_expanded.csv")
+  data_expanded <- read.csv("data/final_model_inputs/mortality_data.csv")
   turb_N_allYears <- read.csv("data/final_model_inputs/turb_all_years.csv")
   
   # prep model input --------------------------------------------------------
@@ -21,10 +21,6 @@ for(i in c(1,3,4)){
     filter(!is.na(Depth)) %>% 
     filter(!is.na(Size.class)) 
   
-  # REMOVE FRINGING REEF DATA
-  prev_mod_data <- prev_mod_data %>% 
-    filter(Habitat_go=='Lagoon')
-  
   # subset size class
   if(is.numeric(size_class)==TRUE){
     if(size_class==1){
@@ -33,9 +29,6 @@ for(i in c(1,3,4)){
     prev_mod_data <- prev_mod_data %>% filter(Size.class==size_class)
     }
   
-  # remove 6 sites that aren't in the turbinara compiled data
-  prev_mod_data <- prev_mod_data %>% 
-    filter(!grepl("LTER",Site))
   
   y <- prev_mod_data$response
   y_p <- ifelse(y > 0, 1, 0)
@@ -45,7 +38,7 @@ for(i in c(1,3,4)){
   for(i in 1:ncol(x_colony)) x_colony[,i] <- scale(x_colony[,i])[,1]
   
   # point level preds
-  site_preds <- prev_mod_data %>% group_by(site_index) %>% summarise(cumtemp=unique(max_heatstress),habitat=unique(Habitat_go),coast=unique(Island_shore))
+  site_preds <- prev_mod_data %>% group_by(site_index) %>% summarise(cumtemp=unique(max_heatstress))
   site_preds$cumtemp_scale <- scale(site_preds$cumtemp)[,1]
   site_preds$site_index_reset <- seq(1:nrow(site_preds))
   
@@ -70,10 +63,7 @@ for(i in c(1,3,4)){
     X_colony=x_colony, #[n,B]
     point=point, #[n]
     P=length(unique(point)), #49
-    #habitat=as.numeric(as.factor(as.character(site_preds$habitat))), #[n] (1 level)
     cum_heat=site_preds$cumtemp_scale, #[P]
-    #K=length(unique(site_preds$habitat)), #1
-    #coast=as.numeric(as.factor(as.character(site_preds$coast))), #[P]
     M=3,
     prior.scale = 10,
     
@@ -89,8 +79,6 @@ for(i in c(1,3,4)){
   initFunc <- function(){return(list(
     # beta_colony_p=rnorm(nXcol,0,1),
     sigma_point_p=runif(1,0,20),
-    # sigma_habitat_p=runif(1,0,20),
-    # sigma_coast_p=runif(1,0,1),
     beta_N =0,
     beta_cumheat=0,
     # beta_cumheat_X_N=0,
@@ -127,9 +115,5 @@ for(i in c(1,3,4)){
   saveRDS(zmPrp, paste0('model_out/prev_',genus,'_',response,'_',size_class,'Size_',Sys.Date(),'_',mod_version,'.Rdata'))
   
   
-  # notes -------------------------------------------------------------------
-  
-  # remove habitat since we are only using lagoon data? KES Done
-  # note to self, you have to have already made folders in the "model_out" folder for it to put the files in
 }
 

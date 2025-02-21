@@ -1,6 +1,5 @@
 for(i in c(1,3,4)){
-  
-  genus <- "Acropora"
+  genus <- "Pocillopora"  #change to "Acropora" or "Pocillopora" and rerun
   size_class <- i
   response <- "Percent_dead"
   mod_version <- "Nsubmodel" #what the data is going to be called when exported
@@ -22,17 +21,10 @@ for(i in c(1,3,4)){
     filter(!is.na(Depth)) %>% 
     filter(!is.na(Size.class)) 
   
-  # REMOVE FRINGING REEF DATA
-  sev_mod_data <- sev_mod_data %>% 
-    filter(Habitat_go=='Lagoon')
-  
   # subset size class
   if(is.numeric(size_class)==TRUE){sev_mod_data <- sev_mod_data %>% filter(Size.class==size_class)}
   sev_mod_data$Size.class <- ifelse(sev_mod_data$Size.class==1|sev_mod_data$Size.class==2,1,sev_mod_data$Size.class)
   
-  # remove 6 sites that aren't in the turbinara compiled data
-  sev_mod_data <- sev_mod_data %>% 
-    filter(!grepl("LTER",Site))
   
   # set up response
   sev_mod_data$y <- sev_mod_data[,response]
@@ -51,7 +43,7 @@ for(i in c(1,3,4)){
   
   
   # point level preds
-  site_preds <- sev_mod_data %>% group_by(site_index) %>% summarise(cumtemp=unique(max_heatstress),habitat=unique(Habitat_go),coast=unique(Island_shore))
+  site_preds <- sev_mod_data %>% group_by(site_index) %>% summarise(cumtemp=unique(max_heatstress))
   site_preds$cumtemp_scale <- scale(site_preds$cumtemp)[,1]
   site_preds$site_index_reset <- seq(1:nrow(site_preds))
   write.csv(site_preds,paste0("model_out/",mod_version,"/",response,"/sev","_",genus,"_",size_class,"Size_site_data_in.csv"))
@@ -69,17 +61,14 @@ for(i in c(1,3,4)){
   write.csv(sev_mod_data,paste0("model_out/",mod_version,"/",response,"/sev","_",genus,"_",size_class,"Size_data_in.csv"))
   
   # model parameters --------------------------------------------------------
-  # we don't know why these numbers are here, not mary's typical style. reminding ourselves what the dimensions of these should be
+  # 
   jd <- list(B=B, #2
              y=y_p, #[n]
              n=length(y_p), #3737
              X_colony=x_colony, #[n,B]
              point=point, #[n]
              P=length(unique(point)), #49
-             #habitat=as.numeric(as.factor(as.character(site_preds$habitat))), #[n] (1 level)
              cum_heat=site_preds$cumtemp_scale, #[P]
-             #K=length(unique(site_preds$habitat)), #1
-             coast=as.numeric(as.factor(as.character(site_preds$coast))), #[P]
              M=3,
              prior.scale = 10,
              
@@ -95,8 +84,6 @@ for(i in c(1,3,4)){
   initFunc <- function(){return(list(
     beta_colony_p=rnorm(nXcol,0,1),
     sigma_point_p=runif(1,0,20),
-    # sigma_habitat_p=runif(1,0,20),
-    # sigma_coast_p=runif(1,0,1),
     beta_N =0,
     beta_cumheat=0,
     beta_cumheat_X_N=-1.5, #previously was commented out and  beta_cumheat_X_N=0,
@@ -113,10 +100,6 @@ for(i in c(1,3,4)){
   # run chains in parallel
   cl <- makeCluster(3) # this determines the number of chains, must be less than the number of cores on computer
   # telling your computer to run this three different times on three different portions of your computer
-  # then paste them back together
-  # some thing has changed either in R or in JAGS and mary can no longer run jags models like this
-  # mary is getting exact same things 3 times. chains are perfectly correlated
-  # mary's current work around for more simple models, comment out line 112-121, 131-132, and then change number of chains to 3. posterior will be zmCore
   clusterExport(cl, c('jd','n.adapt','n.update','n.iter','initFunc','nXcol','nP','mod_version_jags'))
   
   out <- clusterEvalQ(cl,{
