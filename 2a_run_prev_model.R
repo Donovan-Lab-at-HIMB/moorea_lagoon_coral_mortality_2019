@@ -1,3 +1,14 @@
+###------------------------------------------------------------------------#
+# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+#  
+# 2a_run_prev_model
+###------------------------------------------------------------------------#
+
+# this script runs Bayesian hierarchical models for testing individual and interactive effects 
+# of nitrogen and heat stress on coral mortality prevalence
+# script runs model for each size class of corals separately
+# it is necessary to run this script twice, once for Pocillopora and once for Acropora (see line 12)
+
 for(i in c(1,3,4)){
   genus <- "Acropora" #change to "Acropora" or "Pocillopora" and rerun
   size_class <- i
@@ -21,7 +32,7 @@ for(i in c(1,3,4)){
     filter(!is.na(Depth)) %>% 
     filter(!is.na(Size.class)) 
   
-  # subset size class
+  # subset size class, combine size classes 1 and 2
   if(is.numeric(size_class)==TRUE){
     if(size_class==1){
       prev_mod_data$Size.class <- ifelse(prev_mod_data$Size.class==1|prev_mod_data$Size.class==2,1,prev_mod_data$Size.class)
