@@ -1,13 +1,27 @@
+###------------------------------------------------------------------------#
+# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+#  
+# 2a_run_prev_model_all
+###------------------------------------------------------------------------#
 
-genus <- "Acropora"
-size_class <- "all"
-response <- "Percent_dead"
-mod_version <- "Nsubmodel" #what the data is going to be called when exported
-mod_version_jags <- "binom_hierarchical.jags"
+# this script runs Bayesian hierarchical models for testing individual and interactive effects 
+# of nitrogen and heat stress on coral mortality prevalence
+# script runs model for all corals
+# it is necessary to run this script twice, once for Pocillopora and once for Acropora (see line 20)
+
+### Packages ----------------------------------------------------------------#
 
 library(dplyr)
 library(rjags)
 library(parallel)
+
+### -------------------------------------------------------------------------
+
+genus <- "Acropora" #change to "Acropora" or "Pocillopora" and rerun
+size_class <- "all"
+response <- "Percent_dead"
+mod_version <- "Nsubmodel" 
+mod_version_jags <- "binom_hierarchical.jags"
 
 data_expanded <- read.csv("data/final_model_inputs/mortality_data.csv")
 turb_N_allYears <- read.csv("data/final_model_inputs/turb_all_years.csv")
