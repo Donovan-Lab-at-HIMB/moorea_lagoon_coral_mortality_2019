@@ -1,7 +1,16 @@
+###------------------------------------------------------------------------#
+# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+#  
+# 3_crunch_model
+###------------------------------------------------------------------------#
+
+# This script crunches the models, exports coefficients as .csv s, gets gelman-rubin statistics, etc.
+
 library(rjags)
 
-# Crunches models for each size class separately
+### prevalence models for each size class ----------------------------------
 # Only runs for mortality prevalence because we modeled data split by size classes for prevalence only (not severity)
+
 for(i in c(1,3,4)){
   for(k in c("Pocillopora", "Acropora")){
     for(j in c("Percent_dead")){
@@ -47,7 +56,7 @@ for(i in c(1,3,4)){
         beta_up95 = rep(NA,length(grepgo)),
         beta_down95 = rep(NA,length(grepgo))
       )
-      for(q in 1:length(grepgo)){  ### just need a new letter here
+      for(q in 1:length(grepgo)){  
         beta_80$beta[q] <- quantile(c(mod[[1]][,grepgo[q]],
                                       mod[[2]][,grepgo[q]],
                                       mod[[3]][,grepgo[q]]),0.5)
@@ -73,8 +82,8 @@ for(i in c(1,3,4)){
 }
 
 
-# Crunches models for all corals
-# Runs for mortality prevalence and severity
+### prevalence and severity models for all corals ---------------------------------------------
+
 for(i in c("all")){
   for(k in c("Pocillopora", "Acropora")){
     for(j in c("Percent_dead")){
@@ -120,7 +129,7 @@ for(i in c("all")){
           beta_up95 = rep(NA,length(grepgo)),
           beta_down95 = rep(NA,length(grepgo))
         )
-        for(q in 1:length(grepgo)){  ### just need a new letter here
+        for(q in 1:length(grepgo)){  
           beta_80$beta[q] <- quantile(c(mod[[1]][,grepgo[q]],
                                         mod[[2]][,grepgo[q]],
                                         mod[[3]][,grepgo[q]]),0.5)
