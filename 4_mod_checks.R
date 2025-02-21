@@ -1,12 +1,24 @@
+###------------------------------------------------------------------------#
+# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+#  
+# 4_mod_checks
+###------------------------------------------------------------------------#
+
+# This script executes model checks for all models
+
+
 library(bayesplot)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 
-# note to self, having some errors with fonts. works to quit r and rerun.
-###------------------------------ mod checks ------------------------------
 
-###------------------------------ Prevalence All  ------------------------------ # 
+### Model Checks ----------------------------------------------------------------
+# note to self, occasionally have some errors with fonts when running this script. 
+#works to quit r and rerun.
+
+### Prevalence All  ------------------------------------------------------------  
+
 for(k in c("Pocillopora", "Acropora")){
   genus <- k
   size_class <- "all"
@@ -15,7 +27,7 @@ for(k in c("Pocillopora", "Acropora")){
   mod_version <- "Nsubmodel"
   mod_version_jags <- "_hierarchical.jags"
   out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-  mod_date <- "2024-05-24"
+  mod_date <- "2024-12-31"
   
   # getting the model 
   
@@ -66,7 +78,8 @@ ggsave("figs/pp_checks/prev_poc_acr_all_hist.pdf", width=6, height=3, units="in"
 prev_poc_acr_all_dens<-cowplot::plot_grid(prev_Pocillopora_allSize_pp_dens, prev_Acropora_allSize_pp_dens, align = "VH")
 ggsave("figs/pp_checks/prev_poc_acr_all_dens.pdf", width=6, height=3, units="in")
 
-###------------------------------ Prevalence 1Size  ------------------------------ #
+
+### Prevalence 1Size  ------------------------------------------------------------
 
 for(k in c("Pocillopora", "Acropora")){
   genus <- k
@@ -124,7 +137,7 @@ for(k in c("Pocillopora", "Acropora")){
 plot(prev_Pocillopora_1Size_pp_hist)
 plot(prev_Pocillopora_1Size_pp_dens)
 
-###------------------------------ Prevalence 3Size  ------------------------------ # 
+### Prevalence 3Size  ------------------------------------------------------------ 
 
 #for(i in c(1,3,4)){
   for(k in c("Pocillopora", "Acropora")){
@@ -183,7 +196,7 @@ plot(prev_Pocillopora_1Size_pp_dens)
 #}
 
 
-###------------------------------ Prevalence 4Size  ------------------------------ #
+### Prevalence 4Size  ------------------------------------------------------------ 
 
 for(k in c("Pocillopora", "Acropora")){
   genus <- k
@@ -239,7 +252,7 @@ for(k in c("Pocillopora", "Acropora")){
   
 }
 
-###------------------------------ Severity All  ------------------------------
+### Severity All ------------------------------------------------------------ 
 
 for(k in c("Pocillopora", "Acropora")){
   genus <- k
@@ -301,7 +314,7 @@ for(k in c("Pocillopora", "Acropora")){
 }
 
 
-# -------------------------- Cowplots ----------------------------#
+### Combining Plots------------------------------------------------
 
 # Prevalence
 
