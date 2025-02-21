@@ -37,7 +37,7 @@ for(k in c("Pocillopora", "Acropora")){
   dim(yrep)
   
   ## getting the data
-  data_expanded <- read.csv("data/final_model_inputs/data_expanded.csv")
+  data_expanded <- read.csv("data/final_model_inputs/mortality_data.csv")
   data_expanded$response<-data_expanded[,response]
   
   prev_mod_data <- data_expanded %>% 
@@ -89,7 +89,7 @@ for(k in c("Pocillopora", "Acropora")){
   mod_version <- "Nsubmodel"
   mod_version_jags <- "_hierarchical.jags"
   out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-  mod_date <- "2024-05-24"
+  mod_date <- "2024-12-31"
   
   # getting the model 
   
@@ -99,7 +99,7 @@ for(k in c("Pocillopora", "Acropora")){
   dim(yrep)
   
   ## getting the data
-  data_expanded <- read.csv("data/final_model_inputs/data_expanded_1.csv")
+  data_expanded <- read.csv("data/final_model_inputs/mortality_data.csv")
   data_expanded$response<-data_expanded[,response]
   
   prev_mod_data <- data_expanded %>% 
@@ -136,11 +136,13 @@ for(k in c("Pocillopora", "Acropora")){
 
 plot(prev_Pocillopora_1Size_pp_hist)
 plot(prev_Pocillopora_1Size_pp_dens)
+plot(prev_Acropora_1Size_pp_hist)
+plot(prev_Acropora_1Size_pp_dens)
 
 ### Prevalence 3Size  ------------------------------------------------------------ 
 
-#for(i in c(1,3,4)){
-  for(k in c("Pocillopora", "Acropora")){
+
+for(k in c("Pocillopora", "Acropora")){
     genus <- k
     size_class <- 3
     response <- "Percent_dead"
@@ -148,7 +150,7 @@ plot(prev_Pocillopora_1Size_pp_dens)
     mod_version <- "Nsubmodel"
     mod_version_jags <- "_hierarchical.jags"
     out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-    mod_date <- "2024-05-24"
+    mod_date <- "2024-12-31"
     
     # getting the model 
     
@@ -158,7 +160,7 @@ plot(prev_Pocillopora_1Size_pp_dens)
     dim(yrep)
     
     ## getting the data
-    data_expanded <- read.csv("data/final_model_inputs/data_expanded.csv")
+    data_expanded <- read.csv("data/final_model_inputs/mortality_data.csv")
     data_expanded$response<-data_expanded[,response]
     
     prev_mod_data <- data_expanded %>% 
@@ -193,8 +195,11 @@ plot(prev_Pocillopora_1Size_pp_dens)
     #plot(prev_Pocillopora_3Size_pp_hist)
     
   }
-#}
 
+plot(prev_Pocillopora_3Size_pp_hist)
+plot(prev_Pocillopora_3Size_pp_dens)
+plot(prev_Acropora_3Size_pp_hist)
+plot(prev_Acropora_3Size_pp_dens)
 
 ### Prevalence 4Size  ------------------------------------------------------------ 
 
@@ -206,7 +211,7 @@ for(k in c("Pocillopora", "Acropora")){
   mod_version <- "Nsubmodel"
   mod_version_jags <- "_hierarchical.jags"
   out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-  mod_date <- "2024-05-24"
+  mod_date <- "2024-12-31"
   
   # getting the model 
   
@@ -216,7 +221,7 @@ for(k in c("Pocillopora", "Acropora")){
   dim(yrep)
   
   ## getting the data
-  data_expanded <- read.csv("data/final_model_inputs/data_expanded.csv")
+  data_expanded <- read.csv("data/final_model_inputs/mortality_data.csv")
   data_expanded$response<-data_expanded[,response]
   
   prev_mod_data <- data_expanded %>% 
@@ -252,6 +257,11 @@ for(k in c("Pocillopora", "Acropora")){
   
 }
 
+plot(prev_Pocillopora_4Size_pp_hist)
+plot(prev_Pocillopora_4Size_pp_dens)
+plot(prev_Acropora_4Size_pp_hist)
+plot(prev_Acropora_4Size_pp_dens)
+
 ### Severity All ------------------------------------------------------------ 
 
 for(k in c("Pocillopora", "Acropora")){
@@ -262,7 +272,7 @@ for(k in c("Pocillopora", "Acropora")){
   mod_version <- "Nsubmodel"
   mod_version_jags <- "_hierarchical.jags"
   out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-  mod_date <- "2024-05-24"
+  mod_date <- "2024-12-31"
   
   # getting the model 
   
@@ -272,7 +282,7 @@ for(k in c("Pocillopora", "Acropora")){
   dim(yrep)
   
   ## getting the data
-  data_expanded <- read.csv("data/final_model_inputs/data_expanded.csv")
+  data_expanded <- read.csv("data/final_model_inputs/mortality_data.csv")
   
   data_expanded$response <- data_expanded[,response]
   
@@ -313,6 +323,10 @@ for(k in c("Pocillopora", "Acropora")){
 
 }
 
+plot(sev_Pocillopora_allSize_pp_hist)
+plot(sev_Pocillopora_allSize_pp_hist)
+plot(sev_Acropora_allSize_pp_hist)
+plot(sev_Acropora_allSize_pp_hist)
 
 ### Combining Plots------------------------------------------------
 
