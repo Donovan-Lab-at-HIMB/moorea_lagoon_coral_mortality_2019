@@ -7,7 +7,7 @@
 # this script runs Bayesian hierarchical models for testing individual and interactive effects 
 # of nitrogen and heat stress on coral mortality prevalence
 # script runs model for each size class of corals separately
-# it is necessary to run this script twice, once for Pocillopora and once for Acropora (see line 12)
+# it is necessary to run this script twice, once for Pocillopora and once for Acropora (see line 13)
 
 for(i in c(1,3,4)){
   genus <- "Acropora" #change to "Acropora" or "Pocillopora" and rerun
