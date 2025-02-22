@@ -268,7 +268,8 @@ acr_severity<-ggplot() +
 # as_ggplot(legend_acr_severity)
 # ggsave("figs/legend_acr_severity.pdf", width=2, height=2, units="in")
 
-####-------------------------- cowplot -----------------------------------------
+### 4 panel plot ---------------------------------------------------------------
+
 map_fig_2<-cowplot::plot_grid(poc_prevalence, poc_severity, acr_prevalence, acr_severity,
                             scale = 0.9,nrow = 2, align = "vh", labels = c("(a)", "(b)", "(c)", "(d)"))
 #ggsave("figs/map_fig.pdf", width=12, height=8.75, units="in")
@@ -281,7 +282,8 @@ ggsave("figs/map_fig_3.tiff", width=12, height=10, units="in", compression = "lz
 
 
 
-####-------------------------- cowplot -----------------------------------------
+### grab legend ----------------------------------------------------------------
+
 severity_legend<-ggplot() +
   geom_sf(data = fieldSites_sf, #site points colored by severity, sized by number of corals
           aes(col = meanSevAcr,
@@ -332,8 +334,8 @@ legend_acr_prevalence <- get_legend(prevalence_legend)
 legend_acr_prevalence<-ggpubr::as_ggplot(legend_acr_prevalence)
 ggsave("figs/legend_acr_prevalence.pdf", width=2, height=2, units="in")
 
-########## nitrogen 
 
+### map of nitrogen enrichment ----------------------------------------------------------------
 
 fieldSites_sf<-fieldSites_sf%>% arrange(meanN)
 
@@ -363,46 +365,3 @@ nitrogen_fig<-ggplot() +
   theme(legend.title = element_text(size=9), legend.text = element_text(size=9))+
   theme(strip.background = element_rect(colour="white"),legend.position=c(.09,.2))
 ggsave("figs/nitrogen_fig.pdf", width=6.5, height=4.5, units="in")
-
-
-# good color picker resource https://www.canva.com/colors/color-wheel/
-
-### heat stress
-ggplot() +
-  geom_sf(data=moo_longlat)+
-  geom_sf(data = tempPlot_sf, aes(col = max_heatstress, shape=Site_type, size=1))+ #heat stress for all sites
-  scale_color_gradientn(colours=c("#158AEA", "#EA7515"))+
-  scale_shape_manual(values = c(16, 1))+
-  labs(color = "Heat stress")+
-  geom_sf(data = moo)+
-  geom_raster(data=hill_df, aes(x=x, y=y,fill=hillshade))+
-  scale_fill_gradientn(colours=c("#454545", "#e9e9e9"))+
-  guides(fill = "none", size="none")+
-  theme_bw()+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank())+
-  theme(axis.text.x = element_blank(), axis.text.y = element_blank())+
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
-  theme(axis.ticks = element_blank())
-ggsave("figs/nitrogen_fig.pdf", width=6, height=4, units="in")
-
-
-### map of site locations
-ggplot() +
-  geom_sf(data=moo_longlat)+
-  geom_sf(data = fieldSites_sf)+
-  scale_color_gradientn(colours=c("#BEEE62", "#386641"))+
-  #scale_shape_manual(values = c(1))+
-  labs(color = "Mean nitrogen")+
-  geom_sf(data = moo)+
-  geom_raster(data=hill_df, aes(x=x, y=y,fill=hillshade))+
-  scale_fill_gradientn(colours=c("#454545", "#e9e9e9"))+
-  guides(fill = "none", size="none")+
-  theme_bw()+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank())+
-  theme(axis.text.x = element_blank(), axis.text.y = element_blank())+
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
-  theme(axis.ticks = element_blank())
-
-
