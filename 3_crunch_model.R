@@ -22,7 +22,7 @@ for(i in c(1,3,4)){
       mod_version <- "Nsubmodel"
       mod_version_jags <- paste0(z,"_hierarchical.jags")
       out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-      mod_date <- "2024-12-31" #remember to put correct date here
+      mod_date <- "2025-02-21" #remember to put correct date here
       
       mod <- readRDS(paste0('model_out/',distgo,'_',genus,'_',response,'_',size_class,'Size_',mod_date,'_',mod_version,'.Rdata'))
       mod_sum <- summary(mod)
@@ -75,7 +75,7 @@ for(i in c(1,3,4)){
       }
       beta_80$factor<-as.factor(grep('beta',colnames(zmPrp[[1]])))
       beta_80$factor_name<-as.factor(c("beta_N", "beta_colony_depth", "beta_cumheat", "beta_cumheat_X_N"))
-      write.csv(beta_80, paste0(out_dir,distgo,"_",genus,"_",size_class,"Size_beta80_quantiles.csv"),row.names=T)
+      write.csv(beta_80, paste0(out_dir,distgo,"_",genus,"_",size_class,"Size_beta80_quantiles.csv"),row.names=F)
 }
 }
 }
@@ -95,7 +95,7 @@ for(i in c("all")){
         mod_version <- "Nsubmodel"
         mod_version_jags <- paste0(z,"_hierarchical.jags")
         out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-        mod_date <- "2024-12-31"  #remember to put correct date here
+        mod_date <- "2025-02-21"  #remember to put correct date here
         
         mod <- readRDS(paste0('model_out/',distgo,'_',genus,'_',response,'_',size_class,'Size_',mod_date,'_',mod_version,'.Rdata'))
         mod_sum <- summary(mod)
