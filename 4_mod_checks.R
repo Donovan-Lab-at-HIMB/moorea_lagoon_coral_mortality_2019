@@ -5,19 +5,17 @@
 ###------------------------------------------------------------------------#
 
 # This script executes model checks for all models
+# note to self, occasionally have some errors with fonts when running this script. 
+#works to quit r and rerun.
 
+### Packages --------------------------------------------------------------#
 
 library(bayesplot)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 
-
-### Model Checks ----------------------------------------------------------------
-# note to self, occasionally have some errors with fonts when running this script. 
-#works to quit r and rerun.
-
-### Prevalence All  ------------------------------------------------------------  
+### Prevalence All  -------------------------------------------------------  
 
 for(k in c("Pocillopora", "Acropora")){
   genus <- k
