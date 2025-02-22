@@ -1,3 +1,12 @@
+###------------------------------------------------------------------------#
+# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+#  
+# 6_plot_interactions
+###------------------------------------------------------------------------#
+
+# This script plots maps of mortality prevalence, mortality severity, and nitrogen enrichment
+
+### Packages --------------------------------------------------------------#
 
 library(terra)
 library(sf)
@@ -9,18 +18,17 @@ library(rgdal)
 library(ggspatial)
 library(ggpubr)
 
-### making maps
+### prepping data --------------------------------------------------------------#
 
 ### Import Data
 moo=read_sf("data/moorea_map/moorea_outline.shp")
-# moo has one row and 24 columns
+
 plot(moo)
-# want to ask, what was the reference system used for this
+
 moo #"Geometry type: MULTIPOLYGON",and dimensions on an XY coord system
 
 #load field site data
-#need to tell R how this is spatial
-fieldSites_df= read_csv("data/final_model_inputs/site_data_for_map.csv")
+fieldSites_df= read_csv("data/moorea_map/site_data_for_map.csv")
 
 fieldSites_df
 
@@ -98,21 +106,9 @@ ggplot() +
   geom_sf(data = moo)+
   theme_bw()
 
-
 # ---------------------------------------------------------------------
 
-# dots for field sites
-ggplot() +
-  geom_sf(data = fieldSites_sf) +
-  geom_sf(data = moo)
-
-# ---------------------------------------------------------------------
-# ------------------------------ PREVALENCE----------------------------
-# ---------------------------------------------------------------------
-
-#previous blue yellow gradient: "#212CDE", "#DED321"
-
-###------------- Mortality Prevalence -------------
+### Pocillopora Mortality Prevalence ------------------------------------------
 fieldSites_sf<-fieldSites_sf%>%arrange(desc(n_obs_Pocillopora))
 
 poc_prevalence<-ggplot() +
@@ -130,10 +126,6 @@ poc_prevalence<-ggplot() +
   scale_size(breaks=c(50,100,150))+
   labs(color = "Prevalence", size="Corals\nsurveyed")+
   #ggtitle("Pocillopora mortality prevalence")+
-  # annotation_north_arrow(location = "br", which_north = "true", 
-  #                        height = unit(0.4, "in"), width = unit(0.4, "in"), 
-  #                        pad_x = unit(0.2, "in"), pad_y = unit(0.25, "in"))+ #north arrow
-  # annotation_scale(location = "br", pad_x = unit(0.1, "cm"),pad_y = unit(0.1, "cm")) + #scale bar
   theme_bw()+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -152,7 +144,8 @@ poc_prevalence<-ggplot() +
 # as_ggplot(legend_poc_prevalence)
 # ggsave("figs/legend_poc_prevalence.pdf", width=2, height=2, units="in")
 
-# Acropora
+### Acropora Mortality Prevalence ----------------------------------------------
+
 fieldSites_sf<-fieldSites_sf%>%arrange(desc(n_obs_Acropora))
 
 acr_prevalence<-ggplot() +
@@ -171,10 +164,6 @@ acr_prevalence<-ggplot() +
   labs(color = "Prevalence", size="Corals\nsurveyed")+
   #ggtitle("Acropora mortality prevalence")+
   theme(plot.title = element_text(hjust = 0.5))+
-  # annotation_north_arrow(location = "br", which_north = "true", 
-  #                        height = unit(0.4, "in"), width = unit(0.4, "in"), 
-  #                        pad_x = unit(0.2, "in"), pad_y = unit(0.25, "in"))+ #north arrow
-  # annotation_scale(location = "br", pad_x = unit(0.1, "cm"),pad_y = unit(0.1, "cm")) + #scale bar
   theme_bw()+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -193,7 +182,9 @@ acr_prevalence<-ggplot() +
 # as_ggplot(legend_acr_prevalence)
 # ggsave("figs/legend_acr_prevalence.pdf", width=2, height=2, units="in")
 
-###------------- Mortality Severity -------------
+
+
+### Pocillopora Mortality Severity ----------------------------------------------
 
 # old red blue mort severity palette: "#28D1D7", "#D72E28"
 
@@ -215,10 +206,6 @@ poc_severity<-ggplot() +
   labs(color = "Severity", size="Corals\nsurveyed      ")+
   #ggtitle("Pocillopora mortality severity")+  
   theme(plot.title = element_text(hjust = 0.5))+
-  # annotation_north_arrow(location = "br", which_north = "true", 
-  #                        height = unit(0.4, "in"), width = unit(0.4, "in"), 
-  #                        pad_x = unit(0.2, "in"), pad_y = unit(0.25, "in"))+ #north arrow
-  # annotation_scale(location = "br", pad_x = unit(0.1, "cm"),pad_y = unit(0.1, "cm")) + #scale bar
   theme_bw()+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -237,7 +224,8 @@ poc_severity<-ggplot() +
 # as_ggplot(legend_poc_severity)
 # ggsave("figs/legend_poc_severity.pdf", width=2, height=2, units="in")
 
-# Acropora
+### Acropora Mortality Severity ------------------------------------------------
+
 fieldSites_sf<-fieldSites_sf%>%arrange(desc(n_dead_Acr))
 
 acr_severity<-ggplot() +
@@ -279,8 +267,6 @@ acr_severity<-ggplot() +
 # legend_acr_severity <- get_legend(acr_severity)
 # as_ggplot(legend_acr_severity)
 # ggsave("figs/legend_acr_severity.pdf", width=2, height=2, units="in")
-
-
 
 ####-------------------------- cowplot -----------------------------------------
 map_fig_2<-cowplot::plot_grid(poc_prevalence, poc_severity, acr_prevalence, acr_severity,
