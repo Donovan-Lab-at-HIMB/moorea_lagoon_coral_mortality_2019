@@ -1,9 +1,18 @@
+###------------------------------------------------------------------------#
+# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+#  
+# 6_plot_interactions
+###------------------------------------------------------------------------#
+
+# This script makes interaction plots
+
+### Packages --------------------------------------------------------------#
+
 library(rjags)
 library(boot)
 library(ggplot2)
 library(dplyr)
 library(tidyverse)
-
 
 #### --------------------- Acropora Prevalence: Heat x N interaction ------------------
 
@@ -14,7 +23,7 @@ mod_version <- "Nsubmodel"
 mod_version_jags <- "binom_hierarchical.jags"
 distgo <- "prev"
 out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-mod_date <- "2024-10-30" # put the date you ran the model here
+mod_date <- "2025-02-21" # put the date you ran the model here
 
 mod <- readRDS(paste0('model_out/',distgo,'_',genus,'_',response,'_',size_class,'Size_',mod_date,'_',mod_version,'.Rdata'))
 
