@@ -1,13 +1,27 @@
-#change to "Acropora" or "Pocillopora" and rerun
-genus <- "Acropora" 
-size_class <- "all"
-response <- "Percent_dead"
-mod_version <- "Nsubmodel" #what the data is going to be called when exported
-mod_version_jags <- "binom_hierarchical.jags"
+###------------------------------------------------------------------------#
+# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+#  
+# 2b_run_sev_model_all
+###------------------------------------------------------------------------#
+
+# this script runs Bayesian hierarchical models for testing individual and interactive effects 
+# of nitrogen and heat stress on coral mortality severity
+# script runs model for all corals
+# it is necessary to run this script twice, once for Pocillopora and once for Acropora (see line 20)
+
+### Packages ----------------------------------------------------------------#
 
 library(dplyr)
 library(rjags)
 library(parallel)
+
+###------------------------------------------------------------------------#
+
+genus <- "Acropora"  #change to "Acropora" or "Pocillopora" and rerun
+size_class <- "all"
+response <- "Percent_dead"
+mod_version <- "Nsubmodel" #what the data is going to be called when exported
+mod_version_jags <- "binom_hierarchical.jags"
 
 data_expanded <- read.csv("data/final_model_inputs/mortality_data.csv")
 turb_N_allYears <- read.csv("data/final_model_inputs/turb_all_years.csv")
@@ -98,7 +112,6 @@ n.adapt <- 1000; n.update <- 20000; n.iter <- 20000
 # run model - prevalence --------------------------------------------------
 # run chains in parallel
 cl <- makeCluster(3) # this determines the number of chains, must be less than the number of cores on computer
-# telling your computer to run this three different times on three different portions of your computer
 clusterExport(cl, c('jd','n.adapt','n.update','n.iter','initFunc','nXcol','nP','mod_version_jags'))
 
 out <- clusterEvalQ(cl,{
