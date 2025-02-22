@@ -17,7 +17,7 @@ library(parallel)
 
 ###------------------------------------------------------------------------#
 
-genus <- "Acropora"  #change to "Acropora" or "Pocillopora" and rerun
+genus <- "Pocillopora"  #change to "Acropora" or "Pocillopora" and rerun
 size_class <- "all"
 response <- "Percent_dead"
 mod_version <- "Nsubmodel" #what the data is going to be called when exported

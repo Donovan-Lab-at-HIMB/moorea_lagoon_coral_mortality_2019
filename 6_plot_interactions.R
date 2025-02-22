@@ -14,7 +14,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyverse)
 
-#### --------------------- Acropora Prevalence: Heat x N interaction ------------------
+#### Acropora Prevalence: Heat x N interaction ---------------------------------
 
 genus <- "Acropora"
 size_class <-"all" 
@@ -27,13 +27,9 @@ mod_date <- "2025-02-21" # put the date you ran the model here
 
 mod <- readRDS(paste0('model_out/',distgo,'_',genus,'_',response,'_',size_class,'Size_',mod_date,'_',mod_version,'.Rdata'))
 
-# make sure to change these for the correct size class model!
+# read data for the model with all acropora corals
 data_in <- read.csv(paste0(out_dir,distgo,"_Acropora_allSize_data_in.csv"))
 site_data_in <- read.csv(paste0(out_dir,distgo,"_Acropora_allSize_site_data_in.csv"))
-
-# run these for the all plot
-#data_in <- read.csv(paste0(out_dir,distgo,"_Acropora_allSize_data_in.csv"))
-#site_data_in <- read.csv(paste0(out_dir,distgo,"_Acropora_allSize_site_data_in.csv"))
 
 # betas
 grepgo <- grep('beta',colnames(mod[[1]]))
@@ -65,10 +61,9 @@ cumtemp_unique <- tibble::tribble(
 )
 cumtemp_unique <- arrange(cumtemp_unique, cumtemp)
 
-# n_temp_combo <- tidyr::expand_grid(N=turb_means$turb_mean,cumtemp=cumtemp_unique$cumtemp_scale) 
-### change this so its the unique combos we observe in the data
 data_in <- dplyr::left_join(data_in, turb_means, by='site_index_reset')
 data_in <- dplyr::left_join(data_in, site_data_in[c("site_index_reset","cumtemp_scale")], by='site_index_reset')
+# unique combinations we observe in the data
 n_temp_combo <- data_in %>% distinct(site_index_reset,turb_mean,cumtemp_scale) %>% rename(N=turb_mean,cumtemp=cumtemp_scale)
 
 # calculate posterior
@@ -81,6 +76,7 @@ for(i in 1:nrow(post_out)){
   post_out$down[i] <- quantile(temp,0.10)
 }
 
+#prelim plot
 ggplot(data=post_out) + 
   geom_errorbar(aes(x=N,ymin=down,ymax=up)) +
   geom_point(aes(x=N,y=mean)) +
@@ -88,7 +84,7 @@ ggplot(data=post_out) +
   ylab("Prevalence") +
   labs(title="",subtitle = 'Heat Stress')
 
-# lump heat stress
+# lump heat stress into 3 categories
 data_in$cumtemp_scale_cat <- ifelse(data_in$cumtemp_scale < 0, median(cumtemp_unique$cumtemp_scale[cumtemp_unique$cumtemp_scale < 0]), NA)
 data_in$cumtemp_scale_cat <- ifelse(data_in$cumtemp_scale > 0 & data_in$cumtemp_scale < 1.8, median(cumtemp_unique$cumtemp_scale[cumtemp_unique$cumtemp_scale > 0 & cumtemp_unique$cumtemp_scale < 1.8]), data_in$cumtemp_scale_cat)
 data_in$cumtemp_scale_cat <- ifelse(data_in$cumtemp_scale > 1.8, 1.9042608, data_in$cumtemp_scale_cat)
@@ -105,9 +101,10 @@ for(i in 1:nrow(post_out)){
   post_out$up[i] <- quantile(temp,0.90)
   post_out$down[i] <- quantile(temp,0.10)
 }
-#
-# post_out <- post_out %>% mutate(cat = recode(cumtemp, "-0.7476336" = "1_low", "1.9042608" = "3_high", "0.3850851" = "2_moderate"))
-post_out$turb_mean_s <- 0.5034365 + post_out$N*0.1140911  # transform back to original scale
+
+# transform back to original scale
+post_out$turb_mean_s <- 0.5034365 + post_out$N*0.1140911  
+# plot
 ggplot(data=post_out) +
   geom_errorbar(aes(x=turb_mean_s,ymin=down,ymax=up)) +
   geom_point(aes(x=turb_mean_s,y=mean)) +
@@ -116,7 +113,6 @@ ggplot(data=post_out) +
   labs(title="",subtitle = 'Heat Stress')
 
 # resize points to match number of corals
-# raw_out <- data_in %>% group_by(site_index_reset) %>% summarise(n=length(response),raw_mean=mean(response)/100) %>% ungroup()
 data_in$y <- ifelse(data_in$response > 0, 1, 0)
 raw_out <- data_in %>% group_by(site_index_reset) %>% summarise(n=length(response),raw_mean=mean(y)) %>% ungroup()
 post_out <- post_out %>% left_join(raw_out, by='site_index_reset')
@@ -128,8 +124,7 @@ cumtemp_names <- c(
   `1.9042608`= "High heat stress"
 )
 
-# "#055C9D", "#189AB4", "#75E6DA", "black"
-
+# plot nitrogen x heat stress interaction for acropora mortality prevalence
 acr_prev_allSize<-ggplot(data=post_out) + 
   geom_point(aes(x=turb_mean_s,y=raw_mean, size=n), pch=21, fill="#023962", alpha=0.5, stroke=NA) +
   scale_size(name="Number of corals", breaks=c(10,30,50), labels=c("10","30","50"))+
@@ -151,9 +146,9 @@ acr_prev_allSize<-ggplot(data=post_out) +
   theme(strip.background = element_rect(color="white", fill="white", linewidth=1.5))+ #facet background
   theme(strip.text.x = element_text(size = 14))+ #facet text size
   theme(aspect.ratio = 3/2)
-ggsave("figs/acr_prev_allSize_2.pdf", width=8, height=5, units="in")
+ggsave("figs/acr_prev_allSize.pdf", width=8, height=5, units="in")
 
-#### --------------------- Pocillopora Severity: Heat x N interaction ------------------
+#### Pocillopora Mortality Severity: Heat x N interaction ----------------------
 
 genus <- "Pocillopora"
 size_class <-"all" 
@@ -168,10 +163,6 @@ mod <- readRDS(paste0('model_out/',distgo,'_',genus,'_',response,'_',size_class,
 
 data_in <- read.csv(paste0(out_dir,distgo,"_Pocillopora_allSize_data_in.csv"))
 site_data_in <- read.csv(paste0(out_dir,distgo,"_Pocillopora_allSize_site_data_in.csv"))
-
-# run these for the all plot
-#data_in <- read.csv(paste0(out_dir,distgo,"_Acropora_allSize_data_in.csv"))
-#site_data_in <- read.csv(paste0(out_dir,distgo,"_Acropora_allSize_site_data_in.csv"))
 
 # betas
 grepgo <- grep('beta',colnames(mod[[1]]))
@@ -203,8 +194,6 @@ cumtemp_unique <- tibble::tribble(
 )
 cumtemp_unique <- arrange(cumtemp_unique, cumtemp)
 
-# n_temp_combo <- tidyr::expand_grid(N=turb_means$turb_mean,cumtemp=cumtemp_unique$cumtemp_scale) 
-### change this so its the unique combos we observe in the data
 data_in <- dplyr::left_join(data_in, turb_means, by='site_index_reset')
 data_in <- dplyr::left_join(data_in, site_data_in[c("site_index_reset","cumtemp_scale")], by='site_index_reset')
 n_temp_combo <- data_in %>% distinct(site_index_reset,turb_mean,cumtemp_scale) %>% rename(N=turb_mean,cumtemp=cumtemp_scale)
@@ -244,7 +233,7 @@ for(i in 1:nrow(post_out)){
   post_out$down[i] <- quantile(temp,0.10)
 }
 #
-# post_out <- post_out %>% mutate(cat = recode(cumtemp, "-0.7476336" = "1_low", "1.9042608" = "3_high", "0.3850851" = "2_moderate"))
+
 post_out$turb_mean_s <- 0.5034365 + post_out$N*0.1140911  # transform back to original scale
 ggplot(data=post_out) +
   geom_errorbar(aes(x=turb_mean_s,ymin=down,ymax=up)) +
@@ -254,8 +243,6 @@ ggplot(data=post_out) +
   labs(title="",subtitle = 'Heat Stress')
 
 # resize points to match number of corals
-# raw_out <- data_in %>% group_by(site_index_reset) %>% summarise(n=length(response),raw_mean=mean(response)/100) %>% ungroup()
-#data_in$y <- ifelse(data_in$response > 75, 1, 0)
 raw_out <- data_in %>% group_by(site_index_reset) %>% summarise(n=length(response),raw_mean=mean(y)) %>% ungroup()
 post_out <- post_out %>% left_join(raw_out, by='site_index_reset')
 
@@ -265,8 +252,6 @@ cumtemp_names <- c(
   `0.337426897251082` = "Moderate heat stress",
   `1.9042608`= "High heat stress"
 )
-
-
 
 poc_sev_int<-ggplot(data=post_out) + 
   geom_point(aes(x=turb_mean_s,y=(raw_mean),size=n), pch=21, fill="#005215", alpha=0.5, stroke=NA) +
@@ -289,13 +274,14 @@ poc_sev_int<-ggplot(data=post_out) +
   theme(strip.background = element_rect(color="white", fill="white", linewidth=1.5))+ #facet background
   theme(strip.text.x = element_text(size = 14))+ #facet text size
   theme(aspect.ratio = 3/2)
-ggsave("figs/poc_sev_int_2.pdf", width=8, height=5, units="in")
+ggsave("figs/poc_sev_int.pdf", width=8, height=5, units="in")
 
-### ------------- Figure S9: Interaction between nitrogen and heat stress for Acropora, split by size class -----------
+
+### Figure S9: Interaction between nitrogen and heat stress for Acropora, split by size class -----------
 
 genus <- "Acropora"
 size_class <- 3
-# change the number on line 287 and re-run the code below to make the plot for each size class
+# change the number on the line above and re-run the code below to make the plot for each size class
 # those size classes are: 1, 3, 4
 response <- "Percent_dead"
 mod_version <- "Nsubmodel"
