@@ -1,10 +1,14 @@
-
 #   -----------------------------------------------------------------------
-# Fill in missing temperatures using linear models
+# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+#  
+# 1_temperature_fill
+#   -----------------------------------------------------------------------
+# Some loggers were missing in 2019, but we have timeseries going back to 2005 and patterns among sites are highly correlated (>0.97).
+# Using existing data we impute the missing data using linear models 
 # Plots figure 1a,b
+# not necessary to run this script to run subsequent scripts
 #   -----------------------------------------------------------------------
 
-# Some loggers were missing in 2019, but we have timeseries going back to 2005 and patterns among sites are highly correlated (>0.97). Using existing data we impute the missing data. 
 
 library(plyr)
 library(dplyr)
@@ -21,7 +25,7 @@ library(RcppRoll)
 
 # data from Moorea Coral Reef LTER core time series, bottom mounted termistors:
 # http://mcrlter.msi.ucsb.edu/cgi-bin/showDataset.cgi?docid=knb-lter-mcr.1035 # accessed October 28, 2020
-# Leichter, J, K. Seydel and C. Gotschalk of Moorea Coral Reef LTER. 2018. MCR LTER: Coral Reef: Benthic Water Temperature, ongoing since 2005. knb-lter-mcr.1035.11
+# Data citation: Leichter, J, K. Seydel and C. Gotschalk of Moorea Coral Reef LTER. 2018. MCR LTER: Coral Reef: Benthic Water Temperature, ongoing since 2005. knb-lter-mcr.1035.11
 
 temperature <- read.csv(file.path(getwd(),'data/water_temp',paste('MCR_LTER','00','_BottomMountThermistors_20190926.csv',sep='')))
 for(i in c('01','02','03','04','05','06')){
@@ -103,31 +107,6 @@ temp_sub %>%
   ggtitle('Back')
 
 
-temp_sub %>% 
-  filter(day > '2018-12-01') %>%
-  filter(reef_type_code == 'FRI' & sensor_depth_m == 1) %>%
-  # distinct(date,Site,cum_heat) %>% 
-  ggplot() + 
-  geom_point(aes(x=day,y=temp_c,color=site))  + 
-  facet_wrap(~site) +
-  theme_classic() +
-  theme(
-    plot.title = element_text(face = "bold", size = 12),
-    legend.background = element_rect(fill = "white", size = 4, colour = "white"),
-    legend.justification = c(0, 1),
-    # legend.position = c(0, 1),
-    axis.ticks = element_line(colour = "black", size = 0.5),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.text = element_text(size=12), axis.title = element_text(size=12)
-  )  +
-  xlab('Date') +
-  ylab('Cumulative Heat stress 2019') +
-  ggtitle('Fringing, depth=1m')
-
-
-
-
 # predict missing ---------------------------------------------------------
 
 ############### backreef
@@ -148,34 +127,6 @@ temp_bak_wide_warm$year <- year(temp_bak_wide_warm$day)
 temp <- temp_bak_wide_warm %>% filter(year==2019)
 summary(temp) # LTER02, LTER03 LTER04, and LTER05 have complete data in 2019
 
-# temp <- temp_bak_wide %>% select(day,LTER01,LTER03,LTER04) %>% filter(!is.na(LTER01))
-# # lm01_3_4 <- lm(LTER01 ~ LTER03+LTER04, data=temp_bak_wide)
-# # lm01_2_3_4 <- lm(LTER01 ~ LTER02+LTER03+LTER04, data=temp_bak_wide)
-# lm01_2_3_4_5 <- lm(LTER01 ~ LTER02+LTER03+LTER04+LTER05, data=temp_bak_wide)
-# # temp <- temp_bak_wide %>% select(day,LTER01,LTER03,LTER04)
-# # temp_bak_wide$pred01_3_4 <- predict(lm01_3_4,newdata = temp_bak_wide)
-# # temp_bak_wide$pred01_2_3_4 <- predict(lm01_2_3_4,newdata = temp_bak_wide)
-# temp_bak_wide$pred01_2_3_4_5 <- predict(lm01_2_3_4_5,newdata = temp_bak_wide)
-
-# temp <- temp_bak_wide %>% select(day,LTER02,LTER03,LTER04) %>% filter(!is.na(LTER02))
-# lm02 <- lm(LTER02 ~ LTER03+LTER04, data=temp)
-# lm02_3_4 <- lm(LTER02 ~ LTER03+LTER04, data=temp_bak_wide)
-# lm02_3_4_5 <- lm(LTER02 ~ LTER03+LTER04+LTER05, data=temp_bak_wide)
-# lm02_3_4_5_6 <- lm(LTER02 ~ LTER03+LTER04+LTER05+LTER06, data=temp_bak_wide)
-# temp <- temp_bak_wide %>% select(day,LTER02,LTER03,LTER04)
-# temp_bak_wide$pred02_3_4 <- predict(lm02_3_4,newdata = temp_bak_wide)
-# temp_bak_wide$pred02_3_4_5 <- predict(lm02_3_4_5,newdata = temp_bak_wide)
-# temp_bak_wide$pred02_3_4_5_6 <- predict(lm02_3_4_5_6,newdata = temp_bak_wide)
-
-# temp <- temp_bak_wide %>% select(day,LTER05,LTER03,LTER04) %>% filter(!is.na(LTER05))
-# lm05 <- lm(LTER05 ~ LTER03+LTER04, data=temp)
-# temp <- temp_bak_wide %>% select(day,LTER05,LTER03,LTER04)
-# temp_bak_wide$pred05 <- predict(lm05,newdata = temp)
-# 
-# temp <- temp_bak_wide %>% select(day,LTER06,LTER03,LTER04) %>% filter(!is.na(LTER06))
-# lm06 <- lm(LTER06 ~ LTER03+LTER04, data=temp)
-# temp <- temp_bak_wide %>% select(day,LTER06,LTER03,LTER04)
-# temp_bak_wide$pred06 <- predict(lm06,newdata = temp)
 
 lm01_2_3_4_5 <- lm(LTER01 ~ LTER02+LTER03+LTER04+LTER05, data=temp_bak_wide_warm)
 lm01_2_3_4 <- lm(LTER01 ~ LTER02+LTER03+LTER04, data=temp_bak_wide_warm)
@@ -302,6 +253,7 @@ site_names <- c(
   `06` = "LTER 6"
 )
 
+# plot data for timeframe of interest, colored by whether data are known or predicted
 temp_known_predicted_time_plot<-ggplot() + 
   geom_point(data = temp %>% filter(type=='fill' | type=='flag') %>% pivot_wider(names_from='type',values_from='value'), 
              aes(x=day,y=fill,color=as.factor(flag)), pch=16, alpha=0.7)  + 
@@ -326,12 +278,12 @@ temp_known_predicted_time_plot<-ggplot() +
 ggsave("figs/temp_known_predicted_time_plot.pdf", width=8, height=8, units="in")
 
 
-# calc heat stress --------------------------------------------------------
+# calculate heat stress --------------------------------------------------------
 
-# caculate weekly means
+# calculate weekly means
 temp_bak_weekly <- temp_bak_wide %>% 
   dplyr::select(day,starts_with('fill')) %>% 
-  pivot_longer(cols=starts_with('fill'),names_to='site',values_to='temperature') %>% 
+  tidyr::pivot_longer(cols=starts_with('fill'),names_to='site',values_to='temperature') %>% 
   mutate(month=month(day),year=year(day),week=week(day)) %>% 
   group_by(site,year,week) %>% 
   summarise(temp_c=median(temperature,na.rm=T)) %>% 
@@ -371,6 +323,7 @@ temp_bak_cumheat %>%
 
 
 # predict old heat stress events? -----------------------------------------
+# predicted previous heat stress event for which we have a complete timeseries, using the same protocol as above
 
 ## LTER02 data were missing in 2006-7
 
@@ -466,6 +419,7 @@ kp_temp_lter1_plot<-ggplot(data=weekly2007_LTER1, aes(x=temp_c_real,y=temp_c_fil
 #ggsave("figs/kp_temp_plot.png", width=4, height=4, units="in")
 #linear model relationship between real data and filled data
 temp_c_lm<-lm(temp_c_fill~temp_c_real, data=weekly2007_LTER1)
+
 # testing if the slope is different from 1
 linearHypothesis(temp_c_lm, c("(Intercept) = 0", "temp_c_real=1"), test="F")
 linearHypothesis(temp_c_lm, hypothesis.matrix = c(0, 1), rhs=1)
@@ -618,23 +572,7 @@ thermTemp_2019_mean$year<-as.factor(ifelse(thermTemp_2019_mean$month=="08"|therm
 
 thermTemp_mean_and_2019<-rbind(thermTemp_2019_mean, thermTemp_mean)
 
-# temps2019 <-
-#   tidyr::separate(
-#     data = temperature.day.2019.mean,
-#     col = monthday,
-#     sep = "-",
-#     into=c("month", "day"),
-#     remove = TRUE
-#   )
-# 
-# temps2019<-temps2019[,c(1,3,4,2,5,6,7)]
-# 
-# longterm.temps<-thermTemp_mean[,c(7,1,2,3,4,5,6)]
-# 
-# names(longterm.temps)[names(longterm.temps)=="mean_daily_temp"]<-"mean_temp_c"
-# 
-# temps<-rbind(temps2019, longterm.temps)
-
+### Plot Figure 1A - water temperature patterns -------------------------------------
 temp_patterns<-ggplot(thermTemp_mean_and_2019, aes(x=date, y=mean_daily_temp, fill=timeframe))+
   geom_hline(yintercept=29, linetype=2, color="#8B8B8B")+
   geom_ribbon(aes(ymin=mean_daily_temp - sd, ymax=mean_daily_temp + sd), alpha=.2)+
