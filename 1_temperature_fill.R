@@ -10,7 +10,6 @@ library(plyr)
 library(dplyr)
 library(tidyr)
 library(lubridate)
-library(rjags)
 library(ggplot2)
 library(RcppRoll)
 library(ggpubr)
@@ -148,35 +147,7 @@ temp_bak_wide_warm$year <- year(temp_bak_wide_warm$day)
 temp <- temp_bak_wide_warm %>% filter(year==2019)
 summary(temp) # LTER02, LTER03 LTER04, and LTER05 have complete data in 2019
 
-# temp <- temp_bak_wide %>% select(day,LTER01,LTER03,LTER04) %>% filter(!is.na(LTER01))
-# # lm01_3_4 <- lm(LTER01 ~ LTER03+LTER04, data=temp_bak_wide)
-# # lm01_2_3_4 <- lm(LTER01 ~ LTER02+LTER03+LTER04, data=temp_bak_wide)
-# lm01_2_3_4_5 <- lm(LTER01 ~ LTER02+LTER03+LTER04+LTER05, data=temp_bak_wide)
-# # temp <- temp_bak_wide %>% select(day,LTER01,LTER03,LTER04)
-# # temp_bak_wide$pred01_3_4 <- predict(lm01_3_4,newdata = temp_bak_wide)
-# # temp_bak_wide$pred01_2_3_4 <- predict(lm01_2_3_4,newdata = temp_bak_wide)
-# temp_bak_wide$pred01_2_3_4_5 <- predict(lm01_2_3_4_5,newdata = temp_bak_wide)
-
-# temp <- temp_bak_wide %>% select(day,LTER02,LTER03,LTER04) %>% filter(!is.na(LTER02))
-# lm02 <- lm(LTER02 ~ LTER03+LTER04, data=temp)
-# lm02_3_4 <- lm(LTER02 ~ LTER03+LTER04, data=temp_bak_wide)
-# lm02_3_4_5 <- lm(LTER02 ~ LTER03+LTER04+LTER05, data=temp_bak_wide)
-# lm02_3_4_5_6 <- lm(LTER02 ~ LTER03+LTER04+LTER05+LTER06, data=temp_bak_wide)
-# temp <- temp_bak_wide %>% select(day,LTER02,LTER03,LTER04)
-# temp_bak_wide$pred02_3_4 <- predict(lm02_3_4,newdata = temp_bak_wide)
-# temp_bak_wide$pred02_3_4_5 <- predict(lm02_3_4_5,newdata = temp_bak_wide)
-# temp_bak_wide$pred02_3_4_5_6 <- predict(lm02_3_4_5_6,newdata = temp_bak_wide)
-
-# temp <- temp_bak_wide %>% select(day,LTER05,LTER03,LTER04) %>% filter(!is.na(LTER05))
-# lm05 <- lm(LTER05 ~ LTER03+LTER04, data=temp)
-# temp <- temp_bak_wide %>% select(day,LTER05,LTER03,LTER04)
-# temp_bak_wide$pred05 <- predict(lm05,newdata = temp)
-# 
-# temp <- temp_bak_wide %>% select(day,LTER06,LTER03,LTER04) %>% filter(!is.na(LTER06))
-# lm06 <- lm(LTER06 ~ LTER03+LTER04, data=temp)
-# temp <- temp_bak_wide %>% select(day,LTER06,LTER03,LTER04)
-# temp_bak_wide$pred06 <- predict(lm06,newdata = temp)
-
+# Site LTER01
 lm01_2_3_4_5 <- lm(LTER01 ~ LTER02+LTER03+LTER04+LTER05, data=temp_bak_wide_warm)
 lm01_2_3_4 <- lm(LTER01 ~ LTER02+LTER03+LTER04, data=temp_bak_wide_warm)
 lm01_2_3_5 <- lm(LTER01 ~ LTER02+LTER03+LTER05, data=temp_bak_wide_warm)
@@ -192,11 +163,13 @@ temp_bak_wide$pred01_3_4_5 <- predict(lm01_3_4_5,newdata = temp_bak_wide)
 temp_bak_wide$pred01_2 <- predict(lm01_2,newdata = temp_bak_wide)
 temp_bak_wide$pred01_3_4 <- predict(lm01_3_4,newdata = temp_bak_wide)
 
+# Site LTER02
 lm02_2_3_4_5 <- lm(LTER02 ~ LTER03+LTER04+LTER05, data=temp_bak_wide)
 lm02_3_4 <- lm(LTER02 ~ LTER03+LTER04, data=temp_bak_wide)
 temp_bak_wide$pred02_2_3_4_5 <- predict(lm02_2_3_4_5,newdata = temp_bak_wide)
 temp_bak_wide$pred02_3_4 <- predict(lm02_3_4,newdata = temp_bak_wide)
 
+# Site LTER03
 lm03_2_3_4_5 <- lm(LTER03 ~ LTER01+LTER02+LTER04+LTER05, data=temp_bak_wide)
 lm03_1_2 <- lm(LTER03 ~ LTER01+LTER02, data=temp_bak_wide)
 lm03_2_4_5 <- lm(LTER03 ~ LTER02+LTER04+LTER05, data=temp_bak_wide)
@@ -206,6 +179,7 @@ temp_bak_wide$pred03_1_2 <- predict(lm03_1_2,newdata = temp_bak_wide)
 temp_bak_wide$pred03_2_4_5 <- predict(lm03_2_4_5,newdata = temp_bak_wide)
 temp_bak_wide$pred03_2 <- predict(lm03_2,newdata = temp_bak_wide)
 
+# Site LTER04
 lm04_2_3_4_5 <- lm(LTER04 ~ LTER01+LTER02+LTER03+LTER05, data=temp_bak_wide)
 lm04_1_2 <- lm(LTER04 ~ LTER01+LTER02, data=temp_bak_wide)
 lm04_2 <- lm(LTER04 ~ LTER02, data=temp_bak_wide)
@@ -213,6 +187,7 @@ temp_bak_wide$pred04_2_3_4_5 <- predict(lm04_2_3_4_5,newdata = temp_bak_wide)
 temp_bak_wide$pred04_1_2 <- predict(lm04_1_2,newdata = temp_bak_wide)
 temp_bak_wide$pred04_2 <- predict(lm04_2,newdata = temp_bak_wide)
 
+# Site LTER05
 lm05_2_3_4_5 <- lm(LTER05 ~ LTER01+LTER02+LTER03+LTER04+LTER06, data=temp_bak_wide)
 lm05_2 <- lm(LTER05 ~ LTER02, data=temp_bak_wide)
 lm05_1_2 <- lm(LTER05 ~ LTER01+LTER02, data=temp_bak_wide)
@@ -224,6 +199,7 @@ temp_bak_wide$pred05_1_2 <- predict(lm05_1_2,newdata = temp_bak_wide)
 temp_bak_wide$pred05_2_3_4_6 <- predict(lm05_2_3_4_6,newdata = temp_bak_wide)
 temp_bak_wide$pred05_3_4 <- predict(lm05_3_4,newdata = temp_bak_wide)
 
+# Site LTER06
 lm06_1_2_3_4_5 <- lm(LTER06 ~ LTER01+LTER02+LTER03+LTER04+LTER05, data=temp_bak_wide)
 lm06_2 <- lm(LTER06 ~ LTER02, data=temp_bak_wide)
 lm06_1_2 <- lm(LTER06 ~ LTER01+LTER02, data=temp_bak_wide)
@@ -241,6 +217,8 @@ temp_bak_wide$pred06_3_4_5 <- predict(lm06_3_4_5,newdata = temp_bak_wide)
 temp_bak_wide$pred06_3_4 <- predict(lm06_3_4,newdata = temp_bak_wide)
 temp_bak_wide$pred06_2_3_4_5 <- predict(lm06_2_3_4_5,newdata = temp_bak_wide)
 
+# back filling temperature values
+# sequentially using the predicted values from the model with the most data
 temp_bak_wide$fill01 <- ifelse(is.na(temp_bak_wide$LTER01),temp_bak_wide$pred01_2_3_4_5,temp_bak_wide$LTER01)
 temp_bak_wide$fill01 <- ifelse(is.na(temp_bak_wide$fill01),temp_bak_wide$pred01_2_3_4,temp_bak_wide$fill01)
 temp_bak_wide$fill01 <- ifelse(is.na(temp_bak_wide$fill01),temp_bak_wide$pred01_2_3_5,temp_bak_wide$fill01)
