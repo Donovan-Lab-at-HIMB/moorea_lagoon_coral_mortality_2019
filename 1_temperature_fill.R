@@ -19,6 +19,7 @@ library(RcppRoll)
 library(ggpubr)
 library(scales)
 library(RcppRoll)
+library(car)
 
 # data --------------------------------------------------------------------
 
@@ -108,7 +109,7 @@ temp_sub %>%
 
 # predict missing ---------------------------------------------------------
 
-############### backreef
+#backreef
 temp_bak_long <- temp_sub %>% filter(reef_type_code=='BAK') %>% dplyr::select(site,day,temp_c) 
 temp_bak_long$month <- month(temp_bak_long$day)
 temp_bak_long$temp_c_warm <- ifelse(temp_bak_long$month >= 3 & temp_bak_long$month < 6,temp_bak_long$temp_c,NA)
@@ -260,6 +261,7 @@ site_names <- c(
   `06` = "LTER 6"
 )
 
+# Make Figure S1
 # plot data for timeframe of interest, colored by whether data are known or predicted
 temp_known_predicted_time_plot<-ggplot() + 
   geom_point(data = temp %>% filter(type=='fill' | type=='flag') %>% pivot_wider(names_from='type',values_from='value'), 
@@ -403,8 +405,9 @@ weekly_2007_fill$site_lter<-ifelse(weekly_2007_fill$site=="fill01", "LTER01",
 weekly2007 <- left_join(weekly_2007_real[c('site','year','week','temp_c')], weekly_2007_fill[c('site_lter','year','week','temp_c')],by=c('site'='site_lter','year'='year','week'='week'))
 weekly2007_LTER1 <- weekly2007 %>% rename(temp_c_real=temp_c.x, temp_c_fill=temp_c.y) %>% filter(site=="LTER01")
 
+# Plot figures for supplement ---------------------------------------------------
 
-
+### Plot Figure S2a -------------------------------------------------------------
 kp_temp_lter1_plot<-ggplot(data=weekly2007_LTER1, aes(x=temp_c_real,y=temp_c_fill)) + 
   geom_point() + geom_abline(intercept=0,slope=1) + geom_smooth(method='lm')+
   #stat_cor(method = "pearson", label.x = 27.65, label.y = 29.58, p.accuracy = 0.0001, r.accuracy = 0.001)+
@@ -434,41 +437,41 @@ linearHypothesis(temp_c_lm, hypothesis.matrix = c(0, 1), rhs=1)
 cor.test(weekly2007_LTER1$temp_c_real, weekly2007_LTER1$temp_c_fill, method="pearson") # they are highly correlated
 
 
-# combine real and predicted cum heat
-cumheat2007 <- left_join(cumheat2007_real[c('site','year','week','cum_heat_real')],cumheat2007_fill[c('site','year','week','cum_heat_fill')], by=c('site','year','week'))
-cumheat2007_LTER1<- cumheat2007 %>% filter(site=="LTER01")
+# # combine real and predicted cum heat
+# cumheat2007 <- left_join(cumheat2007_real[c('site','year','week','cum_heat_real')],cumheat2007_fill[c('site','year','week','cum_heat_fill')], by=c('site','year','week'))
+# cumheat2007_LTER1<- cumheat2007 %>% filter(site=="LTER01")
+# 
+# ggplot(data=cumheat2007_LTER1, aes(x=cum_heat_real,y=cum_heat_fill)) + 
+#   geom_point() + geom_abline(a=0,b=1) + geom_smooth(method='lm')
+# 
+# #testing correlation
+# cor.test(cumheat2007_LTER1$cum_heat_real, cumheat2007_LTER1$cum_heat_fill, method="pearson") # they are highly correlated
+# 
+# # but does the slope of the line differ from 1? 
+# cum_heat_lm<-lm(cum_heat_fill~cum_heat_real, data=cumheat2007_LTER1)
+# linearHypothesis(cum_heat_lm, c("(Intercept) = 0", "cum_heat_real=1"))
+# linearHypothesis(cum_heat_lm, c("(Intercept) = 0", "cum_heat_real = 1"))
+# 
+# 
+# kp_cumheat_plot<-ggplot(data=cumheat2007, aes(x=cum_heat_real,y=cum_heat_fill)) + 
+#   geom_point() + geom_abline(intercept=0,slope=1) + geom_smooth(method='lm')+
+#   theme_bw()+
+#   stat_cor(method = "pearson", label.x = 0.8, label.y = 3.9, p.accuracy = 0.0001, r.accuracy = 0.001)+
+#   xlab('Cumulative heat stress known')+
+#   ylab('Cumulative heat stress predicted')+
+#   ggtitle("Weekly cumulative heat stress")+
+#   theme(panel.grid.major = element_blank(), 
+#         panel.grid.minor = element_blank(),
+#         panel.background = element_blank(), 
+#         axis.ticks = element_line(color="black"),
+#         axis.title = element_text(size=14),
+#         axis.text.x=element_text(color="black", size=14),
+#         axis.text.y=element_text(color="black", size=14))
+# 
+# corplots<-cowplot::plot_grid(kp_temp_plot, kp_cumheat_plot, align = "vh", nrow=1, labels = c("(a)", "(b)"), label_fontface = "italic")
+# ggsave("figs/corplots.pdf", width=8, height=4, units="in")
 
-ggplot(data=cumheat2007_LTER1, aes(x=cum_heat_real,y=cum_heat_fill)) + 
-  geom_point() + geom_abline(a=0,b=1) + geom_smooth(method='lm')
-
-#testing correlation
-cor.test(cumheat2007_LTER1$cum_heat_real, cumheat2007_LTER1$cum_heat_fill, method="pearson") # they are highly correlated
-
-# but does the slope of the line differ from 1? 
-cum_heat_lm<-lm(cum_heat_fill~cum_heat_real, data=cumheat2007_LTER1)
-linearHypothesis(cum_heat_lm, c("(Intercept) = 0", "cum_heat_real=1"))
-linearHypothesis(cum_heat_lm, c("(Intercept) = 0", "cum_heat_real = 1"))
-
-
-kp_cumheat_plot<-ggplot(data=cumheat2007, aes(x=cum_heat_real,y=cum_heat_fill)) + 
-  geom_point() + geom_abline(intercept=0,slope=1) + geom_smooth(method='lm')+
-  theme_bw()+
-  stat_cor(method = "pearson", label.x = 0.8, label.y = 3.9, p.accuracy = 0.0001, r.accuracy = 0.001)+
-  xlab('Cumulative heat stress known')+
-  ylab('Cumulative heat stress predicted')+
-  ggtitle("Weekly cumulative heat stress")+
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(), 
-        axis.ticks = element_line(color="black"),
-        axis.title = element_text(size=14),
-        axis.text.x=element_text(color="black", size=14),
-        axis.text.y=element_text(color="black", size=14))
-
-corplots<-cowplot::plot_grid(kp_temp_plot, kp_cumheat_plot, align = "vh", nrow=1, labels = c("(a)", "(b)"), label_fontface = "italic")
-ggsave("figs/corplots.pdf", width=8, height=4, units="in")
-
-##------------ LTER 6 ------------
+##------------ LTER 6 ------------ #
 # this needs to go up top
 temp2007$fill06 <- temp2007$pred06_3_4_5
 ggplot(data=temp2007, aes(x=LTER06,y=pred06_3_4_5)) + geom_point() + geom_abline(a=0,b=1) + geom_smooth(method='lm')
@@ -477,6 +480,7 @@ ggplot(data=temp2007, aes(x=LTER06,y=pred06_3_4_5)) + geom_point() + geom_abline
 # now this down here stays
 weekly2007_LTER6 <- weekly2007 %>% rename(temp_c_real=temp_c.x, temp_c_fill=temp_c.y) %>% filter(site=="LTER06")
 
+### Plot Figure S2b -------------------------------------------------------------
 kp_temp_lter6_plot<-ggplot(data=weekly2007_LTER6, aes(x=temp_c_real,y=temp_c_fill)) + 
   geom_point() + geom_abline(intercept=0,slope=1) + geom_smooth(method='lm')+
   #stat_cor(method = "pearson", label.x = 27.65, label.y = 29.58, p.accuracy = 0.0001, r.accuracy = 0.001)+
@@ -509,7 +513,7 @@ ggsave("figs/real_predicted_temps_2007.pdf", width=8, height=4, units="in")
 
 
 
-#-------------------- create dataframe to export ----------------------------------------------
+# export max heat stress values---------------------------------------------------
 
 bak_out <- temp_bak_cumheat %>% 
   group_by(site) %>% 
@@ -527,7 +531,7 @@ write.csv(out, 'data/water_temp/cumulative_heatstress_2019_bysite_filled.csv', r
 write.csv(temp_bak_wide %>% select(day,starts_with('LTER'),starts_with('fill')),"data/water_temp/backreef_filled_temperature.csv",row.names=F)
 
 
-#-------------------- plot figures ----------------------------------------------
+# plot main text figures ------------------------------------------------------------------
 
 # use temp_bak_long dataframe. give it a new name
 thermTemp<-temp_bak_long
@@ -579,7 +583,7 @@ thermTemp_2019_mean$year<-as.factor(ifelse(thermTemp_2019_mean$month=="08"|therm
 
 thermTemp_mean_and_2019<-rbind(thermTemp_2019_mean, thermTemp_mean)
 
-### Plot Figure 1A - water temperature patterns -------------------------------------
+### Plot Figure 1a - water temperature patterns -------------------------------------
 temp_patterns<-ggplot(thermTemp_mean_and_2019, aes(x=date, y=mean_daily_temp, fill=timeframe))+
   geom_hline(yintercept=29, linetype=2, color="#8B8B8B")+
   geom_ribbon(aes(ymin=mean_daily_temp - sd, ymax=mean_daily_temp + sd), alpha=.2)+
@@ -598,7 +602,7 @@ temp_patterns<-ggplot(thermTemp_mean_and_2019, aes(x=date, y=mean_daily_temp, fi
   theme(aspect.ratio = 3/4)
 
 
-# simple stats for temperature and heat stress ----------------------------------------------
+### simple stats for temperature and heat stress ----------------------------------------------
 
 temp_bak_cumheat_sub<-temp_bak_cumheat
 # binary column, 1 for days >29C, 0 for days <29
@@ -614,7 +618,6 @@ temp_bak_cumheat_sub$week<-factor(temp_bak_cumheat_sub$week)
 temp_bak_cumheat_sub_sum<-temp_bak_cumheat_sub %>% group_by(week) %>% 
   summarise(temp_c_mean = mean(temp_c), over_29=sum(over29), cum_heat_mean=mean(cum_heat)) %>% ungroup()
 
-
 temp_sum_day <- temp_bak_cumheat_sub %>% group_by(site) %>% summarise(temp_c_mean = mean(temp_c), over_29=sum(over29)) %>% ungroup()
 
 sum(temp_bak_cumheat_sub$over29) #number of days >29 during the heatwave: 115
@@ -622,7 +625,7 @@ length(temp_bak_cumheat_sub$over29) #total number of days in this window: 139
 temp_bak_cumheat_sub_longest<-filter(temp_bak_cumheat_sub, day >= '2019-02-28' & day <= '2019-05-01')
 length(lter.day.sub.longest$over29) #consecutive days over 29: 63
 
-
+### Plot Figure 1b - heat stress patterns -------------------------------------
 heat_stress<-ggplot(temp_bak_cumheat_sub) + 
   geom_line(aes(x=date,y=cum_heat,color=Site),lwd=1)  + 
   theme_classic() +
