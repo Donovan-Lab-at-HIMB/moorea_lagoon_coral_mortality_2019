@@ -1,8 +1,8 @@
-###------------------------------------------------------------------------#
-# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+# ------------------------------------------------------------------------#
+# Nitrogen enrichment determines coral mortality during a marine heatwave
 #  
-# 6_plot_interactions
-###------------------------------------------------------------------------#
+# 7_map_figs
+# ------------------------------------------------------------------------#
 
 # This script plots maps of mortality prevalence, mortality severity, and nitrogen enrichment
 
@@ -18,22 +18,25 @@ library(rgdal)
 library(ggspatial)
 library(ggpubr)
 
-### prepping data --------------------------------------------------------------#
 
-### Import Data
+
+# Import Moorea Outline ---------------------------------------------------------
+
 moo=read_sf("data/moorea_map/moorea_outline.shp")
-
+# moo has one row and 24 columns
 plot(moo)
-
+# want to ask, what was the reference system used for this
 moo #"Geometry type: MULTIPOLYGON",and dimensions on an XY coord system
 
-#load field site data
-fieldSites_df= read_csv("data/moorea_map/site_data_for_map.csv")
+# Import Field Site Data -------------------------------------------------------
+
+#need to tell R how this is spatial
+fieldSites_df= read_csv("data/moorea_map/site_summaries_for_map.csv")
 
 fieldSites_df
 
 fieldSites_df<-fieldSites_df %>% 
-  rename(
+  dplyr::rename(
     y = Latitude.2019,
     x = Longitude.2019
   )
@@ -49,7 +52,7 @@ lterSites_df= read_csv("data/moorea_map/LTER_Backreef_Sites_LatLon.csv")
 lterSites_df
 
 lterSites_df<-lterSites_df %>% 
-  rename(
+  dplyr::rename(
     y = lat,
     x = long
   )
@@ -66,7 +69,7 @@ tempPlot_sf<-rbind(lterSites_sf, fieldSites_sf) #combining for plotting
 tempPlot_sf$max_heatstress_fac<-as.factor(tempPlot_sf$max_heatstress)
 tempPlot_sf
 
-#### Import data, raster ----
+# Import Hillshade Layer ----------------------------------------------------
 
 hill = rast("data/moorea_map/hillshade_gruen.tif")
 #hill = rast("data/moorea_map/hillshade.tif")
@@ -84,8 +87,7 @@ moo_longlat = moo %>% st_transform(crs=mycrs)
 moo_longlat
 #now we can plot these things together
 
-# bathymetry---------------------------------------------------------------------
-
+# Import Bathymetry ------------------------------------------------------------
 
 bathy<-read.table("data/moorea_map/bathy_LIDAR_Riegl_820_05m.xyz")
 reg<-griddify(bathy, nlon =1000, nlat = 1000)
@@ -106,9 +108,10 @@ ggplot() +
   geom_sf(data = moo)+
   theme_bw()
 
-# ---------------------------------------------------------------------
+# Make Map Figures -------------------------------------------------------------
 
-### Pocillopora Mortality Prevalence ------------------------------------------
+## Pocillopora Mortality Prevalence --------------------------------------------
+
 fieldSites_sf<-fieldSites_sf%>%arrange(desc(n_obs_Pocillopora))
 
 poc_prevalence<-ggplot() +
@@ -122,10 +125,9 @@ poc_prevalence<-ggplot() +
   geom_sf(data = fieldSites_sf, #site points colored by severity, sized by number of corals
           aes(col = prev_Pocillopora,
               size=n_obs_Pocillopora))+
-  scale_color_gradientn(colours=c("#14EB85", "#C7387C", "#EB147A"), limits = c(0,100), labels = c("0%","25%","50%","75%","100%"), guide="none")+
+  scale_color_gradientn(colours=c("#14EB85", "#5CA381", "#A35C7E", "#EB147A"), limits = c(0,100), labels = c("0%","25%","50%","75%","100%"), guide="none")+
   scale_size(breaks=c(50,100,150))+
   labs(color = "Prevalence", size="Corals\nsurveyed")+
-  #ggtitle("Pocillopora mortality prevalence")+
   theme_bw()+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -138,13 +140,13 @@ poc_prevalence<-ggplot() +
   theme(legend.position=c(0.22,0))+
   theme(strip.background = element_rect(colour="white"), 
         legend.background = element_rect(color = NA, fill = NA))
-  #theme(legend.position = "none") #comment this out and rerun to grab the legend
+theme(legend.position = "none") #comment this out and rerun to grab the legend
 
-# legend_poc_prevalence <- get_legend(poc_prevalence)
-# as_ggplot(legend_poc_prevalence)
-# ggsave("figs/legend_poc_prevalence.pdf", width=2, height=2, units="in")
+legend_poc_prevalence <- get_legend(poc_prevalence)
+as_ggplot(legend_poc_prevalence)
+ggsave("figs/legend_poc_prevalence.pdf", width=2, height=2, units="in")
 
-### Acropora Mortality Prevalence ----------------------------------------------
+## Acropora Mortality Prevalence --------------------------------------------
 
 fieldSites_sf<-fieldSites_sf%>%arrange(desc(n_obs_Acropora))
 
@@ -159,11 +161,11 @@ acr_prevalence<-ggplot() +
   geom_sf(data = fieldSites_sf, #site points colored by severity, sized by number of corals
           aes(col = prev_Acropora,
               size=n_obs_Acropora))+
-  scale_color_gradientn(colours=c("#14EB85", "#C7387C", "#EB147A"), limits = c(0,100), labels = c("0%","25%","50%","75%","100%"))+
-  scale_size(breaks=c(15,30,45))+
+  scale_color_gradientn(colours=c("#14EB85", "#808080", "#B54A7D", "#EB147A"), limits = c(0,100), labels = c("0%","25%","50%","75%","100%"))+
+  scale_size(breaks=c(10,30,50))+
   labs(color = "Prevalence", size="Corals\nsurveyed")+
   #ggtitle("Acropora mortality prevalence")+
-  theme(plot.title = element_text(hjust = 0.5))+
+  labs(color = "Prevalence", size="Corals\nsurveyed")+
   theme_bw()+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -173,23 +175,20 @@ acr_prevalence<-ggplot() +
   theme(axis.ticks = element_blank())+  
   theme(legend.title = element_text(size=9), legend.text = element_text(size=9))+
   theme(legend.direction = "vertical", legend.box = "vertical",legend.justification="bottom")+
-  #theme(legend.position=c(0.22,0))+
+  theme(legend.position=c(0.22,0))+
   theme(strip.background = element_rect(colour="white"), 
-        legend.background = element_rect(color = NA, fill = NA))
-  #theme(legend.position = "none") #comment this out and rerun to grab the legend
+        legend.background = element_rect(color = NA, fill = NA))+
+  theme(legend.position = "none") #comment this out and rerun to grab the legend
 
-# legend_acr_prevalence <- get_legend(acr_prevalence)
-# as_ggplot(legend_acr_prevalence)
-# ggsave("figs/legend_acr_prevalence.pdf", width=2, height=2, units="in")
+legend_acr_prevalence <- get_legend(acr_prevalence)
+as_ggplot(legend_acr_prevalence)
+ggsave("figs/legend_acr_prevalence.pdf", width=2, height=4, units="in")
 
-
-
-### Pocillopora Mortality Severity ----------------------------------------------
+## Pocillopora Mortality Severity --------------------------------------------
 
 # old red blue mort severity palette: "#28D1D7", "#D72E28"
 
-# Pocillopora
-fieldSites_sf<-fieldSites_sf%>%arrange(desc(n_dead_Poc))
+fieldSites_sf<-fieldSites_sf%>%arrange(desc(n_obs_sev_Pocillopora))
 
 poc_severity<-ggplot() +
   geom_point(data = bath_df, aes(x,y),color = grey(0.9), size = 0.01, show.legend=FALSE)+ #bathy layer
@@ -200,12 +199,16 @@ poc_severity<-ggplot() +
   guides(fill = "none")+
   geom_sf(data=moo_longlat, fill="transparent", lwd=0.1,col="#696969")+ #adding outline
   geom_sf(data = fieldSites_sf, #site points colored by severity, sized by number of corals
-          aes(col = meanSevPoc,
-              size=n_dead_Poc))+
+          aes(col = sev_avg_Pocillopora,
+              size=n_obs_sev_Pocillopora))+
   scale_color_gradientn(colours=c("#AFF50A", "#500AF5"), limits = c(0,100), labels = c("0%","25%","50%","75%","100%"), guide="none")+
   labs(color = "Severity", size="Corals\nsurveyed      ")+
   #ggtitle("Pocillopora mortality severity")+  
   theme(plot.title = element_text(hjust = 0.5))+
+  # annotation_north_arrow(location = "br", which_north = "true", 
+  #                        height = unit(0.4, "in"), width = unit(0.4, "in"), 
+  #                        pad_x = unit(0.2, "in"), pad_y = unit(0.25, "in"))+ #north arrow
+  # annotation_scale(location = "br", pad_x = unit(0.1, "cm"),pad_y = unit(0.1, "cm")) + #scale bar
   theme_bw()+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -218,15 +221,15 @@ poc_severity<-ggplot() +
   theme(legend.position=c(0.22,0))+
   theme(strip.background = element_rect(colour="white"), 
         legend.background = element_rect(color = NA, fill = NA))
-  #theme(legend.position = "right") #comment this out and rerun to grab the legend
+#theme(legend.position = "right") #comment this out and rerun to grab the legend
 
 # legend_poc_severity <- get_legend(poc_severity)
 # as_ggplot(legend_poc_severity)
 # ggsave("figs/legend_poc_severity.pdf", width=2, height=2, units="in")
 
-### Acropora Mortality Severity ------------------------------------------------
+## Acropora Mortality Severity --------------------------------------------
 
-fieldSites_sf<-fieldSites_sf%>%arrange(desc(n_dead_Acr))
+fieldSites_sf<-fieldSites_sf%>%arrange(desc(n_obs_sev_Acropora))
 
 acr_severity<-ggplot() +
   geom_point(data = bath_df, aes(x,y),color = grey(0.9), size = 0.01, show.legend=FALSE)+ #bathy layer
@@ -237,8 +240,8 @@ acr_severity<-ggplot() +
   guides(fill = "none")+
   geom_sf(data=moo_longlat, fill="transparent", lwd=0.1,col="#696969")+ #adding outline
   geom_sf(data = fieldSites_sf, #site points colored by severity, sized by number of corals
-          aes(col = meanSevAcr,
-              size=n_dead_Acr))+
+          aes(col = sev_avg_Acropora,
+              size=n_obs_sev_Acropora))+
   scale_color_gradientn(colours=c("#AFF50A", "#500AF5"), limits = c(0,100), labels = c("0%","25%","50%","75%","100%"), guide="none")+
   labs(color = "Severity", size="Corals\nsurveyed")+
   #ggtitle("Acropora mortality severity")+
@@ -259,21 +262,22 @@ acr_severity<-ggplot() +
   theme(legend.position=c(0.22,0))+
   theme(strip.background = element_rect(colour="white"), 
         legend.background = element_rect(color = NA, fill = NA))
-  #theme(legend.position = "none") #comment this out and rerun to grab the legend
+#theme(legend.position = "none") #comment this out and rerun to grab the legend
 #ggsave("figs/acropora_severity.pdf", width=6.5, height=4.5, units="in")
-# returning warning about removing 5 rows b/c there were 5 sites that had no acroproa mortality
+# get a warnng message about removing 5 rows b/c there were 5 sites that had no acroproa mortality
 
 
 # legend_acr_severity <- get_legend(acr_severity)
 # as_ggplot(legend_acr_severity)
 # ggsave("figs/legend_acr_severity.pdf", width=2, height=2, units="in")
 
-### 4 panel plot ---------------------------------------------------------------
 
-map_fig_2<-cowplot::plot_grid(poc_prevalence, poc_severity, acr_prevalence, acr_severity,
-                            scale = 0.9,nrow = 2, align = "vh", labels = c("(a)", "(b)", "(c)", "(d)"))
+
+####-------------------------- cowplot -----------------------------------------
+map_fig_2_new<-cowplot::plot_grid(poc_prevalence, poc_severity, acr_prevalence, acr_severity,
+                                  scale = 0.9,nrow = 2, align = "vh", labels = c("(a)", "(b)", "(c)", "(d)"))
 #ggsave("figs/map_fig.pdf", width=12, height=8.75, units="in")
-ggsave("figs/map_fig_2.tiff", width=12, height=10, units="in", compression = "lzw")
+ggsave("figs/map_fig_2_new.tiff", width=12, height=10, units="in", compression = "lzw")
 
 
 map_fig_3<-cowplot::plot_grid(poc_prevalence, acr_prevalence, poc_severity,  acr_severity,
@@ -282,8 +286,7 @@ ggsave("figs/map_fig_3.tiff", width=12, height=10, units="in", compression = "lz
 
 
 
-### grab legend ----------------------------------------------------------------
-
+####-------------------------- legend cowplot -----------------------------------------
 severity_legend<-ggplot() +
   geom_sf(data = fieldSites_sf, #site points colored by severity, sized by number of corals
           aes(col = meanSevAcr,
@@ -334,8 +337,7 @@ legend_acr_prevalence <- get_legend(prevalence_legend)
 legend_acr_prevalence<-ggpubr::as_ggplot(legend_acr_prevalence)
 ggsave("figs/legend_acr_prevalence.pdf", width=2, height=2, units="in")
 
-
-### map of nitrogen enrichment ----------------------------------------------------------------
+## Nitrogen Enrichment ---------------------------------------------------------
 
 fieldSites_sf<-fieldSites_sf%>% arrange(meanN)
 
@@ -365,3 +367,6 @@ nitrogen_fig<-ggplot() +
   theme(legend.title = element_text(size=9), legend.text = element_text(size=9))+
   theme(strip.background = element_rect(colour="white"),legend.position=c(.09,.2))
 ggsave("figs/nitrogen_fig.pdf", width=6.5, height=4.5, units="in")
+
+
+# other blue yellow gradient: "#212CDE", "#DED321"

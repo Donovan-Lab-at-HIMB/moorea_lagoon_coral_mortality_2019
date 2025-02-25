@@ -1,12 +1,12 @@
-###------------------------------------------------------------------------#
-# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+# ------------------------------------------------------------------------#
+# Nitrogen enrichment determines coral mortality during a marine heatwave
 #  
 # 6_plot_interactions
-###------------------------------------------------------------------------#
+# ------------------------------------------------------------------------#
 
 # This script makes interaction plots
 
-### Packages --------------------------------------------------------------#
+# Packages --------------------------------------------------------------#
 
 library(rjags)
 library(boot)
@@ -14,7 +14,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyverse)
 
-#### Acropora Prevalence: Heat x N interaction ---------------------------------
+# Acropora Prevalence: Heat x N interaction ---------------------------------
 
 genus <- "Acropora"
 size_class <-"all" 
@@ -23,7 +23,7 @@ mod_version <- "Nsubmodel"
 mod_version_jags <- "binom_hierarchical.jags"
 distgo <- "prev"
 out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-mod_date <- "2025-02-21" # put the date you ran the model here
+mod_date <- "2025-02-25" # put the date you ran the model here
 
 mod <- readRDS(paste0('model_out/',distgo,'_',genus,'_',response,'_',size_class,'Size_',mod_date,'_',mod_version,'.Rdata'))
 
@@ -148,7 +148,7 @@ acr_prev_allSize<-ggplot(data=post_out) +
   theme(aspect.ratio = 3/2)
 ggsave("figs/acr_prev_allSize.pdf", width=8, height=5, units="in")
 
-#### Pocillopora Mortality Severity: Heat x N interaction ----------------------
+# Pocillopora Mortality Severity: Heat x N interaction ----------------------
 
 genus <- "Pocillopora"
 size_class <-"all" 
@@ -157,7 +157,7 @@ mod_version <- "Nsubmodel"
 mod_version_jags <- "binom_hierarchical.jags"
 distgo <- "sev"
 out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-mod_date <- "2024-05-24"
+mod_date <- "2025-02-25"
 
 mod <- readRDS(paste0('model_out/',distgo,'_',genus,'_',response,'_',size_class,'Size_',mod_date,'_',mod_version,'.Rdata'))
 
@@ -277,7 +277,7 @@ poc_sev_int<-ggplot(data=post_out) +
 ggsave("figs/poc_sev_int.pdf", width=8, height=5, units="in")
 
 
-### Figure S9: Interaction between nitrogen and heat stress for Acropora, split by size class -----------
+# Figure S9: Interaction between nitrogen and heat stress for Acropora, split by size class -----------
 
 genus <- "Acropora"
 size_class <- 3
@@ -288,7 +288,7 @@ mod_version <- "Nsubmodel"
 mod_version_jags <- "binom_hierarchical.jags"
 distgo <- "prev"
 out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-mod_date <- "2024-05-24"
+mod_date <- "2025-02-25"
 
 mod <- readRDS(paste0('model_out/',distgo,'_',genus,'_',response,'_',size_class,'Size_',mod_date,'_',mod_version,'.Rdata'))
 

@@ -1,17 +1,17 @@
-###------------------------------------------------------------------------#
-# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+# ------------------------------------------------------------------------------#
+# Nitrogen enrichment determines coral mortality during a marine heatwave
 #  
 # 5_plot_coefficients
-###------------------------------------------------------------------------#
+# -----------------------------------------------------------------------------#
 
 # This script plots model coefficients
 
-### Packages --------------------------------------------------------------#
+# Packages --------------------------------------------------------------------#
 
 library(ggplot2)
 library(cowplot)
 
-###  Pocillopora Mortality Prevalence -------------------------------------
+# Pocillopora Mortality Prevalence ----------------------------------------------
 
 #inputting results from the model
 prev_poc_allsize<-read.csv("./model_out/Nsubmodel/Percent_dead/prev_Pocillopora_allSize_beta80_quantiles.csv", header=TRUE, stringsAsFactors = TRUE)
@@ -61,7 +61,7 @@ prevalence_poc<-ggplot()+
 
 
 
-### Acropora Mortality Prevalence -------------------------------------------------------
+# Acropora Mortality Prevalence -------------------------------------------------------
 
 #inputting results from the model
 prev_acr_allsize<-read.csv("./model_out/Nsubmodel/Percent_dead/prev_Acropora_allSize_beta80_quantiles.csv", header=TRUE, stringsAsFactors = TRUE)
@@ -109,7 +109,7 @@ prevalence_acr<-ggplot()+
   theme(legend.text=element_text(size=12))
 
 
-###  Pocillopora Mortality Severity --------------------------------------------
+# Pocillopora Mortality Severity --------------------------------------------
 
 #inputting results from the model
 sev_poc_allsize<-read.csv("./model_out/Nsubmodel/Percent_dead/sev_Pocillopora_allSize_beta80_quantiles.csv", header=TRUE, stringsAsFactors = TRUE)
@@ -167,8 +167,8 @@ sev_acr$Size<-factor(sev_acr$Size, levels=c("All"))
 # plot coefficients for Acropora mortality severity
 severity_acr<-ggplot(sev_acr, aes(x=beta, y=factor_name, color=Size))+
   geom_vline(xintercept=0, linetype="dashed", color="darkgray")+
-  geom_errorbar(position = position_dodge(0.75),aes(xmin=beta_down95, xmax=beta_up95, width = 0),lineend="round")+
-  geom_errorbar(position = position_dodge(0.75),aes(xmin=beta_down80, xmax=beta_up80, width = 0), size=1.75, lineend="round")+
+  geom_errorbar(position = position_dodge(0.75),aes(xmin=beta_down95, xmax=beta_up95, width = 0))+
+  geom_errorbar(position = position_dodge(0.75),aes(xmin=beta_down80, xmax=beta_up80, width = 0), size=1.75)+
   geom_point(aes(fill=Size), position = position_dodge(0.75), size=3, shape=21, color="black")+
   #ggtitle(expression(italic("Acropora")))+
   ggtitle(expression(paste(italic("Acropora"), " mortality severity")))+
