@@ -1,21 +1,21 @@
-###------------------------------------------------------------------------#
-# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+#------------------------------------------------------------------------#
+# Nitrogen enrichment determines coral mortality during a marine heatwave
 #  
 # 2a_run_prev_model_all
-###------------------------------------------------------------------------#
+#------------------------------------------------------------------------#
 
 # this script runs Bayesian hierarchical models for testing individual and interactive effects 
 # of nitrogen and heat stress on coral mortality prevalence
 # script runs model for all corals
 # it is necessary to run this script twice, once for Pocillopora and once for Acropora (see line 20)
 
-### Packages ----------------------------------------------------------------#
+# Packages ----------------------------------------------------------------#
 
 library(dplyr)
 library(rjags)
 library(parallel)
 
-### -------------------------------------------------------------------------
+# Specify model version --------------------------------------------------- 
 
 genus <- "Acropora" #change to "Acropora" or "Pocillopora" and rerun
 size_class <- "all"

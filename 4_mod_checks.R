@@ -1,21 +1,21 @@
-###------------------------------------------------------------------------#
+# -----------------------------------------------------------------------------#
 # Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
 #  
 # 4_mod_checks
-###------------------------------------------------------------------------#
+# -----------------------------------------------------------------------------#
 
 # This script executes model checks for all models
 # note to self, occasionally have some errors with fonts when running this script. 
-#works to quit r and rerun.
+# works to quit r and rerun.
 
-### Packages --------------------------------------------------------------#
+# Packages --------------------------------------------------------------------
 
 library(bayesplot)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 
-### Prevalence All  -------------------------------------------------------  
+# Prevalence All Sizes  --------------------------------------------------------  
 
 for(k in c("Pocillopora", "Acropora")){
   genus <- k
@@ -77,7 +77,7 @@ prev_poc_acr_all_dens<-cowplot::plot_grid(prev_Pocillopora_allSize_pp_dens, prev
 ggsave("figs/pp_checks/prev_poc_acr_all_dens.pdf", width=6, height=3, units="in")
 
 
-### Prevalence 1Size  ------------------------------------------------------------
+# Prevalence 1Size  ------------------------------------------------------------
 
 for(k in c("Pocillopora", "Acropora")){
   genus <- k
@@ -137,8 +137,7 @@ plot(prev_Pocillopora_1Size_pp_dens)
 plot(prev_Acropora_1Size_pp_hist)
 plot(prev_Acropora_1Size_pp_dens)
 
-### Prevalence 3Size  ------------------------------------------------------------ 
-
+# Prevalence 3Size  ------------------------------------------------------------ 
 
 for(k in c("Pocillopora", "Acropora")){
     genus <- k

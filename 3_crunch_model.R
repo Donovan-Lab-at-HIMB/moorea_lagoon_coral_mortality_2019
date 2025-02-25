@@ -1,10 +1,12 @@
-###------------------------------------------------------------------------#
-# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+# ----------------------------------------------------------------------------#
+# Nitrogen enrichment determines coral mortality during a marine heatwave
 #  
 # 3_crunch_model
-###------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 # This script crunches the models, exports coefficients as .csv s, gets gelman-rubin statistics, etc.
+
+# Packages --------------------------------------------------------------------#
 
 library(rjags)
 

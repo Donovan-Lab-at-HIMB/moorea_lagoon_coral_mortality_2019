@@ -1,14 +1,16 @@
-#   -----------------------------------------------------------------------
+# ----------------------------------------------------------------------- #
 # Nitrogen enrichment determines coral mortality during a marine heatwave
 #  
 # 1_temperature_fill
-#   -----------------------------------------------------------------------
+# ----------------------------------------------------------------------- #
+
 # Two temperature loggers failed during marine heatwave in 2019, 
 # but we have time series going back to 2005 and patterns among sites are highly correlated (>0.97)
 # Using existing, data we impute the missing data using linear models 
 # Plots Figures 1a,b, S1, S2a,b
 # It is not necessary to run this script to run subsequent scripts
-#   -----------------------------------------------------------------------
+
+# Packages --------------------------------------------------------------- #
 
 library(plyr)
 library(dplyr)
