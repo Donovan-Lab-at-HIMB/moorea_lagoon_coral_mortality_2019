@@ -334,26 +334,25 @@ temp_bak_cumheat %>%
 # predict old heat stress events? -----------------------------------------
 # predicted previous heat stress event for which we have a complete timeseries, using the same protocol as above
 
-## LTER02 data were missing in 2006-7
+# timeseries of temperature data in 2006-7 was complete for all sites except LTER02 (data not recorded)
+# want to predict data for LTER01 and LTER02 to compare real vs predicted values
+# in other words, predicting for one backreef site using data from 4 other backreef sites with data in 2007
 
-# predicting for one backreef site using data from 4 other backreef sites with data in 2007
 temp2007 <- temp_bak_wide %>% 
   filter(day > '2006-12-01' & day < '2007-07-01')
 
-# pulling fil data for lter01
+# pulling fill data for lter01
 ggplot(data=temp2007, aes(x=LTER01,y=pred01_3_4_5)) + geom_point() + geom_abline(a=0,b=1) + geom_smooth(method='lm')
 temp2007$fill01 <- temp2007$pred01_3_4_5
-# ideally we would predict by 3_4_5_6 but we didn't set up this script to predict that way 
 
-# pulling fil data for lter01
+# pulling fill data for lter06
 temp2007$fill06 <- temp2007$pred06_3_4_5
 ggplot(data=temp2007, aes(x=LTER06,y=pred06_3_4_5)) + geom_point() + geom_abline(a=0,b=1) + geom_smooth(method='lm')
-# until here
 
 # calculate heat stress from the actual and predicted and check the congruence 
 
 ## FILL data --- 
-# caculate weekly median
+# calculate weekly median
 weekly_2007_fill <- temp2007 %>% 
   dplyr::select(day,starts_with('fill')) %>% 
   pivot_longer(cols=starts_with('fill'),names_to='site',values_to='temperature') %>% 
@@ -436,40 +435,6 @@ linearHypothesis(temp_c_lm, hypothesis.matrix = c(0, 1), rhs=1)
 
 cor.test(weekly2007_LTER1$temp_c_real, weekly2007_LTER1$temp_c_fill, method="pearson") # they are highly correlated
 
-
-# # combine real and predicted cum heat
-# cumheat2007 <- left_join(cumheat2007_real[c('site','year','week','cum_heat_real')],cumheat2007_fill[c('site','year','week','cum_heat_fill')], by=c('site','year','week'))
-# cumheat2007_LTER1<- cumheat2007 %>% filter(site=="LTER01")
-# 
-# ggplot(data=cumheat2007_LTER1, aes(x=cum_heat_real,y=cum_heat_fill)) + 
-#   geom_point() + geom_abline(a=0,b=1) + geom_smooth(method='lm')
-# 
-# #testing correlation
-# cor.test(cumheat2007_LTER1$cum_heat_real, cumheat2007_LTER1$cum_heat_fill, method="pearson") # they are highly correlated
-# 
-# # but does the slope of the line differ from 1? 
-# cum_heat_lm<-lm(cum_heat_fill~cum_heat_real, data=cumheat2007_LTER1)
-# linearHypothesis(cum_heat_lm, c("(Intercept) = 0", "cum_heat_real=1"))
-# linearHypothesis(cum_heat_lm, c("(Intercept) = 0", "cum_heat_real = 1"))
-# 
-# 
-# kp_cumheat_plot<-ggplot(data=cumheat2007, aes(x=cum_heat_real,y=cum_heat_fill)) + 
-#   geom_point() + geom_abline(intercept=0,slope=1) + geom_smooth(method='lm')+
-#   theme_bw()+
-#   stat_cor(method = "pearson", label.x = 0.8, label.y = 3.9, p.accuracy = 0.0001, r.accuracy = 0.001)+
-#   xlab('Cumulative heat stress known')+
-#   ylab('Cumulative heat stress predicted')+
-#   ggtitle("Weekly cumulative heat stress")+
-#   theme(panel.grid.major = element_blank(), 
-#         panel.grid.minor = element_blank(),
-#         panel.background = element_blank(), 
-#         axis.ticks = element_line(color="black"),
-#         axis.title = element_text(size=14),
-#         axis.text.x=element_text(color="black", size=14),
-#         axis.text.y=element_text(color="black", size=14))
-# 
-# corplots<-cowplot::plot_grid(kp_temp_plot, kp_cumheat_plot, align = "vh", nrow=1, labels = c("(a)", "(b)"), label_fontface = "italic")
-# ggsave("figs/corplots.pdf", width=8, height=4, units="in")
 
 ##------------ LTER 6 ------------ #
 # this needs to go up top
