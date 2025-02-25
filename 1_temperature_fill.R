@@ -3,10 +3,11 @@
 #  
 # 1_temperature_fill
 #   -----------------------------------------------------------------------
-# Some loggers were missing in 2019, but we have timeseries going back to 2005 and patterns among sites are highly correlated (>0.97).
-# Using existing data we impute the missing data using linear models 
-# Plots figure 1a,b
-# not necessary to run this script to run subsequent scripts
+# Two temperature loggers failed during marine heatwave in 2019, 
+# but we have time series going back to 2005 and patterns among sites are highly correlated (>0.97)
+# Using existing, data we impute the missing data using linear models 
+# Plots Figures 1a,b, S1, S2a,b
+# It is not necessary to run this script to run subsequent scripts
 #   -----------------------------------------------------------------------
 
 
@@ -331,154 +332,7 @@ temp_bak_cumheat %>%
   ylab('Cumulative Heat stress 2019')
 
 
-# predict old heat stress events? -----------------------------------------
-# predicted previous heat stress event for which we have a complete timeseries, using the same protocol as above
-
-# timeseries of temperature data in 2006-7 was complete for all sites except LTER02 (data not recorded)
-# want to predict data for LTER01 and LTER02 to compare real vs predicted values
-# in other words, predicting for one backreef site using data from 4 other backreef sites with data in 2007
-
-temp2007 <- temp_bak_wide %>% 
-  filter(day > '2006-12-01' & day < '2007-07-01')
-
-# pulling fill data for lter01
-ggplot(data=temp2007, aes(x=LTER01,y=pred01_3_4_5)) + geom_point() + geom_abline(a=0,b=1) + geom_smooth(method='lm')
-temp2007$fill01 <- temp2007$pred01_3_4_5
-
-# pulling fill data for lter06
-temp2007$fill06 <- temp2007$pred06_3_4_5
-ggplot(data=temp2007, aes(x=LTER06,y=pred06_3_4_5)) + geom_point() + geom_abline(a=0,b=1) + geom_smooth(method='lm')
-
-# calculate heat stress from the actual and predicted and check the congruence 
-
-## FILL data --- 
-# calculate weekly median
-weekly_2007_fill <- temp2007 %>% 
-  dplyr::select(day,starts_with('fill')) %>% 
-  pivot_longer(cols=starts_with('fill'),names_to='site',values_to='temperature') %>% 
-  mutate(month=month(day),year=year(day),week=week(day)) %>% 
-  group_by(site,year,week) %>% 
-  summarise(temp_c=median(temperature,na.rm=T)) %>% 
-  ungroup()
-
-# calculate accumulated heat stress
-mma_ref <- 29
-weekly_2007_fill$hotspot <- weekly_2007_fill$temp_c - mma_ref
-weekly_2007_fill$hotspot[weekly_2007_fill$hotspot < 0] <- 0
-
-cumheat2007_fill <- weekly_2007_fill %>%
-  arrange(site, year, week) %>%
-  group_by(site) %>%
-  mutate(cum_heat_fill = roll_sum(hotspot, 12, align = "right", fill = NA))
-cumheat2007_fill$site <-stringr::str_replace(cumheat2007_fill$site,'fill','LTER')
-
-# Real data --- 
-weekly_2007_real <- temp_bak_wide %>% 
-  filter(day > '2006-12-01' & day < '2007-07-01') %>% 
-  dplyr::select(day,starts_with('LTER')) %>% 
-  pivot_longer(cols=starts_with('LTER'),names_to='site',values_to='temperature') %>% 
-  mutate(month=month(day),year=year(day),week=week(day)) %>% 
-  group_by(site,year,week) %>% 
-  summarise(temp_c=median(temperature,na.rm=T)) %>% 
-  ungroup()
-
-# calculate accumulated heat stress
-mma_ref <- 29
-weekly_2007_real$hotspot <- weekly_2007_real$temp_c - mma_ref
-weekly_2007_real$hotspot[weekly_2007_real$hotspot < 0] <- 0
-
-cumheat2007_real <- weekly_2007_real %>%
-  arrange(site, year, week) %>%
-  group_by(site) %>%
-  mutate(cum_heat_real = roll_sum(hotspot, 12, align = "right", fill = NA))
-
-
-# combine real and predicted weekly temperature
-weekly_2007_fill$site_lter<-ifelse(weekly_2007_fill$site=="fill01", "LTER01", 
-                                   ifelse(weekly_2007_fill$site=="fill02", "LTER02",
-                                          ifelse(weekly_2007_fill$site=="fill03", "LTER03",
-                                                 ifelse(weekly_2007_fill$site=="fill04", "LTER04",
-                                                        ifelse(weekly_2007_fill$site=="fill05", "LTER05",
-                                                               ifelse(weekly_2007_fill$site=="fill06", "LTER06", NA))))))
-
-weekly2007 <- left_join(weekly_2007_real[c('site','year','week','temp_c')], weekly_2007_fill[c('site_lter','year','week','temp_c')],by=c('site'='site_lter','year'='year','week'='week'))
-weekly2007_LTER1 <- weekly2007 %>% rename(temp_c_real=temp_c.x, temp_c_fill=temp_c.y) %>% filter(site=="LTER01")
-
-# Plot figures for supplement ---------------------------------------------------
-
-### Plot Figure S2a -------------------------------------------------------------
-kp_temp_lter1_plot<-ggplot(data=weekly2007_LTER1, aes(x=temp_c_real,y=temp_c_fill)) + 
-  geom_point() + geom_abline(intercept=0,slope=1) + geom_smooth(method='lm')+
-  #stat_cor(method = "pearson", label.x = 27.65, label.y = 29.58, p.accuracy = 0.0001, r.accuracy = 0.001)+
-  theme_bw()+
-  xlab(expression(paste('Temperature known (',~degree,'C)',sep='')))+
-  ylab(expression(paste('Temperature predicted (',~degree,'C)',sep='')))+
-  scale_x_continuous(limits = c(27.3, 29.8), breaks=seq(27.5,30.0, by=0.5))+
-  scale_y_continuous(limits = c(27.3, 29.8), breaks=seq(27.5,30.0, by=0.5))+
-  ggtitle("Weekly median temperature at LTER 1")+
-  theme(plot.title = element_text(hjust = 0.5),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(), 
-        axis.ticks = element_line(color="black"),
-        axis.title = element_text(size=14),
-        axis.text.x=element_text(color="black", size=14),
-        axis.text.y=element_text(color="black", size=14),
-        aspect.ratio=1)
-#ggsave("figs/kp_temp_plot.png", width=4, height=4, units="in")
-#linear model relationship between real data and filled data
-temp_c_lm<-lm(temp_c_fill~temp_c_real, data=weekly2007_LTER1)
-
-# testing if the slope is different from 1
-linearHypothesis(temp_c_lm, c("(Intercept) = 0", "temp_c_real=1"), test="F")
-linearHypothesis(temp_c_lm, hypothesis.matrix = c(0, 1), rhs=1)
-
-cor.test(weekly2007_LTER1$temp_c_real, weekly2007_LTER1$temp_c_fill, method="pearson") # they are highly correlated
-
-
-##------------ LTER 6 ------------ #
-# this needs to go up top
-temp2007$fill06 <- temp2007$pred06_3_4_5
-ggplot(data=temp2007, aes(x=LTER06,y=pred06_3_4_5)) + geom_point() + geom_abline(a=0,b=1) + geom_smooth(method='lm')
-# until here
-
-# now this down here stays
-weekly2007_LTER6 <- weekly2007 %>% rename(temp_c_real=temp_c.x, temp_c_fill=temp_c.y) %>% filter(site=="LTER06")
-
-### Plot Figure S2b -------------------------------------------------------------
-kp_temp_lter6_plot<-ggplot(data=weekly2007_LTER6, aes(x=temp_c_real,y=temp_c_fill)) + 
-  geom_point() + geom_abline(intercept=0,slope=1) + geom_smooth(method='lm')+
-  #stat_cor(method = "pearson", label.x = 27.65, label.y = 29.58, p.accuracy = 0.0001, r.accuracy = 0.001)+
-  theme_bw()+
-  xlab(expression(paste('Temperature known (',~degree,'C)',sep='')))+
-  ylab(expression(paste('Temperature predicted (',~degree,'C)',sep='')))+
-  scale_x_continuous(limits = c(27.3, 29.8), breaks=seq(27.5,30.0, by=0.5))+
-  scale_y_continuous(limits = c(27.3, 29.8), breaks=seq(27.5,30.0, by=0.5))+
-  ggtitle("Weekly median temperature at LTER 6")+
-  theme(plot.title = element_text(hjust = 0.5),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(), 
-        axis.ticks = element_line(color="black"),
-        axis.title = element_text(size=14),
-        axis.text.x=element_text(color="black", size=14),
-        axis.text.y=element_text(color="black", size=14),
-        aspect.ratio=1)
-#linear model relationship between real data and filled data
-temp_c_lter6_lm<-lm(temp_c_fill~temp_c_real, data=weekly2007_LTER6)
-# testing if the slope is different from 1
-linearHypothesis(temp_c_lter6_lm, c("(Intercept) = 0", "temp_c_real=1"), test="F")
-linearHypothesis(temp_c_lter6_lm, hypothesis.matrix = c(0, 1), rhs=1)
-
-cor.test(weekly2007_LTER6$temp_c_real, weekly2007_LTER6$temp_c_fill, method="pearson") # they are highly correlated
-
-
-real_predicted_temps_2007<-cowplot::plot_grid(kp_temp_lter1_plot, kp_temp_lter6_plot, align = "vh", nrow=1, labels = c("(a)", "(b)"), label_fontface = "italic")
-ggsave("figs/real_predicted_temps_2007.pdf", width=8, height=4, units="in")
-
-
-
-# export max heat stress values---------------------------------------------------
+# export max heat stress values ---------------------------------------------------
 
 bak_out <- temp_bak_cumheat %>% 
   group_by(site) %>% 
@@ -537,8 +391,8 @@ thermTemp_mean<-thermTemp_mean[, c("day","month","year","date","mean_daily_temp"
 thermTemp_2019<-subset(thermTemp, date_use>="2018-08-01" & date_use<="2019-07-31")
 
 thermTemp_2019_mean<-ddply(thermTemp_2019, .(day, month, year, date), summarize,
-                                 mean_daily_temp=mean(temp_c),
-                                 sd=sd(temp_c))
+                           mean_daily_temp=mean(temp_c),
+                           sd=sd(temp_c))
 
 #creating a factor column for this year
 thermTemp_2019_mean$timeframe<-as.factor("2018to2019")
@@ -611,3 +465,126 @@ heat_stress<-ggplot(temp_bak_cumheat_sub) +
 
 temp_figure<-cowplot::plot_grid(temp_patterns, heat_stress, nrow = 2, align="vh", labels=c("(a)", "(b)"))
 ggsave("figs/temp_figure.pdf", width=5.5, height=8, units="in")
+
+
+# predict old heat stress events? -----------------------------------------
+# predicted previous heat stress event for which we have a complete timeseries, using the same protocol as above
+
+# timeseries of temperature data in 2006-7 was complete for all sites except LTER02 (data not recorded)
+# want to predict data for LTER01 and LTER02 to compare real vs predicted values
+# in other words, predicting for one backreef site using data from 4 other backreef sites with data in 2007
+
+temp2007 <- temp_bak_wide %>% 
+  filter(day > '2006-12-01' & day < '2007-07-01')
+
+# pulling fill data for lter01
+ggplot(data=temp2007, aes(x=LTER01,y=pred01_3_4_5)) + geom_point() + geom_abline(a=0,b=1) + geom_smooth(method='lm')
+temp2007$fill01 <- temp2007$pred01_3_4_5
+
+# pulling fill data for lter06
+temp2007$fill06 <- temp2007$pred06_3_4_5
+ggplot(data=temp2007, aes(x=LTER06,y=pred06_3_4_5)) + geom_point() + geom_abline(a=0,b=1) + geom_smooth(method='lm')
+
+# compare actual and predicted weekly median temperature and check the congruence 
+
+## FILL data --- 
+# calculate weekly median
+weekly_2007_fill <- temp2007 %>% 
+  dplyr::select(day,starts_with('fill')) %>% 
+  pivot_longer(cols=starts_with('fill'),names_to='site',values_to='temperature') %>% 
+  mutate(month=month(day),year=year(day),week=week(day)) %>% 
+  group_by(site,year,week) %>% 
+  summarise(temp_c=median(temperature,na.rm=T)) %>% 
+  ungroup()
+
+# REAL data --- 
+# calculate weekly median
+weekly_2007_real <- temp_bak_wide %>% 
+  filter(day > '2006-12-01' & day < '2007-07-01') %>% 
+  dplyr::select(day,starts_with('LTER')) %>% 
+  pivot_longer(cols=starts_with('LTER'),names_to='site',values_to='temperature') %>% 
+  mutate(month=month(day),year=year(day),week=week(day)) %>% 
+  group_by(site,year,week) %>% 
+  summarise(temp_c=median(temperature,na.rm=T)) %>% 
+  ungroup()
+
+# combine real and predicted weekly temperature
+weekly_2007_fill$site_lter<-ifelse(weekly_2007_fill$site=="fill01", "LTER01", 
+                                   ifelse(weekly_2007_fill$site=="fill02", "LTER02",
+                                          ifelse(weekly_2007_fill$site=="fill03", "LTER03",
+                                                 ifelse(weekly_2007_fill$site=="fill04", "LTER04",
+                                                        ifelse(weekly_2007_fill$site=="fill05", "LTER05",
+                                                               ifelse(weekly_2007_fill$site=="fill06", "LTER06", NA))))))
+
+weekly2007 <- left_join(weekly_2007_real[c('site','year','week','temp_c')], weekly_2007_fill[c('site_lter','year','week','temp_c')],by=c('site'='site_lter','year'='year','week'='week'))
+weekly2007_LTER1 <- weekly2007 %>% rename(temp_c_real=temp_c.x, temp_c_fill=temp_c.y) %>% filter(site=="LTER01")
+
+
+# Plot Figure S2 for supplement ---------------------------------------------------
+
+### Plot Figure S2a - LTER01 ----------------------------------------------------
+kp_temp_lter1_plot<-ggplot(data=weekly2007_LTER1, aes(x=temp_c_real,y=temp_c_fill)) + 
+  geom_point() + geom_abline(intercept=0,slope=1) + geom_smooth(method='lm')+
+  #stat_cor(method = "pearson", label.x = 27.65, label.y = 29.58, p.accuracy = 0.0001, r.accuracy = 0.001)+
+  theme_bw()+
+  xlab(expression(paste('Temperature known (',~degree,'C)',sep='')))+
+  ylab(expression(paste('Temperature predicted (',~degree,'C)',sep='')))+
+  scale_x_continuous(limits = c(27.3, 29.8), breaks=seq(27.5,30.0, by=0.5))+
+  scale_y_continuous(limits = c(27.3, 29.8), breaks=seq(27.5,30.0, by=0.5))+
+  ggtitle("Weekly median temperature at LTER 1")+
+  theme(plot.title = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.ticks = element_line(color="black"),
+        axis.title = element_text(size=14),
+        axis.text.x=element_text(color="black", size=14),
+        axis.text.y=element_text(color="black", size=14),
+        aspect.ratio=1)
+#ggsave("figs/kp_temp_plot.png", width=4, height=4, units="in")
+#linear model relationship between real data and filled data
+temp_c_lm<-lm(temp_c_fill~temp_c_real, data=weekly2007_LTER1)
+
+# testing if the slope is different from 1
+linearHypothesis(temp_c_lm, c("(Intercept) = 0", "temp_c_real=1"), test="F")
+linearHypothesis(temp_c_lm, hypothesis.matrix = c(0, 1), rhs=1)
+
+cor.test(weekly2007_LTER1$temp_c_real, weekly2007_LTER1$temp_c_fill, method="pearson") # they are highly correlated
+
+
+### Plot Figure S2b - LTER06 ----------------------------------------------------
+weekly2007_LTER6 <- weekly2007 %>% rename(temp_c_real=temp_c.x, temp_c_fill=temp_c.y) %>% filter(site=="LTER06")
+
+kp_temp_lter6_plot<-ggplot(data=weekly2007_LTER6, aes(x=temp_c_real,y=temp_c_fill)) + 
+  geom_point() + geom_abline(intercept=0,slope=1) + geom_smooth(method='lm')+
+  #stat_cor(method = "pearson", label.x = 27.65, label.y = 29.58, p.accuracy = 0.0001, r.accuracy = 0.001)+
+  theme_bw()+
+  xlab(expression(paste('Temperature known (',~degree,'C)',sep='')))+
+  ylab(expression(paste('Temperature predicted (',~degree,'C)',sep='')))+
+  scale_x_continuous(limits = c(27.3, 29.8), breaks=seq(27.5,30.0, by=0.5))+
+  scale_y_continuous(limits = c(27.3, 29.8), breaks=seq(27.5,30.0, by=0.5))+
+  ggtitle("Weekly median temperature at LTER 6")+
+  theme(plot.title = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.ticks = element_line(color="black"),
+        axis.title = element_text(size=14),
+        axis.text.x=element_text(color="black", size=14),
+        axis.text.y=element_text(color="black", size=14),
+        aspect.ratio=1)
+
+#linear model relationship between real data and filled data
+temp_c_lter6_lm<-lm(temp_c_fill~temp_c_real, data=weekly2007_LTER6)
+# testing if the slope is different from 1
+linearHypothesis(temp_c_lter6_lm, c("(Intercept) = 0", "temp_c_real=1"), test="F")
+linearHypothesis(temp_c_lter6_lm, hypothesis.matrix = c(0, 1), rhs=1)
+
+cor.test(weekly2007_LTER6$temp_c_real, weekly2007_LTER6$temp_c_fill, method="pearson") # they are highly correlated
+
+
+real_predicted_temps_2007<-cowplot::plot_grid(kp_temp_lter1_plot, kp_temp_lter6_plot, align = "vh", nrow=1, labels = c("(a)", "(b)"), label_fontface = "italic")
+ggsave("figs/real_predicted_temps_2007.pdf", width=8, height=4, units="in")
+
+
+
