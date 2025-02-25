@@ -1,5 +1,5 @@
 #   -----------------------------------------------------------------------
-# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+# Nitrogen enrichment determines coral mortality during a marine heatwave
 #  
 # 1_temperature_fill
 #   -----------------------------------------------------------------------
@@ -9,7 +9,6 @@
 # Plots Figures 1a,b, S1, S2a,b
 # It is not necessary to run this script to run subsequent scripts
 #   -----------------------------------------------------------------------
-
 
 library(plyr)
 library(dplyr)
@@ -33,16 +32,16 @@ for(i in c('01','02','03','04','05','06')){
   temperature <- rbind(temperature,read.csv(file.path(getwd(),'data/water_temp',paste('MCR_LTER',i,'_BottomMountThermistors_20191023.csv',sep=''))))
  }
 
- head(temperature)
+head(temperature)
 # saveRDS(temperature,file='data/water_temp/temperature_combined_2019.Rdata')
 # temperature <- readRDS(file='data/water_temp/temperature_combined_2019.Rdata')
- temperature$time_use <- ymd_hms(temperature$time_local)
- temperature$day <- format(temperature$time_use, '%Y-%m-%d')
+temperature$time_use <- ymd_hms(temperature$time_local)
+temperature$day <- format(temperature$time_use, '%Y-%m-%d')
 
 # median temperature by day (and filter out forereef)
- temperature.day <- temperature %>% group_by(site,reef_type_code,sensor_type,sensor_depth_m,day) %>% filter(reef_type_code=='BAK' | reef_type_code=='FRI') %>% summarise(temp_c = median(temperature_c)) %>% ungroup()
- temperature.day$day <- ymd(temperature.day$day)
- saveRDS(temperature.day, file='data/water_temp/temperature_day_2019.Rdata')
+temperature.day <- temperature %>% group_by(site,reef_type_code,sensor_type,sensor_depth_m,day) %>% filter(reef_type_code=='BAK' | reef_type_code=='FRI') %>% summarise(temp_c = median(temperature_c)) %>% ungroup()
+temperature.day$day <- ymd(temperature.day$day)
+saveRDS(temperature.day, file='data/water_temp/temperature_day_2019.Rdata')
 
 #temperature.day <- readRDS('data/water_temp/temperature_day_2019.Rdata')
 temperature.day$day <- as.Date(temperature.day$day, '%Y-%m-%d')
