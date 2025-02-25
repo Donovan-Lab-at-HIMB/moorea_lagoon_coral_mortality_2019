@@ -44,10 +44,6 @@ for(k in c("Pocillopora", "Acropora")){
     filter(!is.na(Depth)) %>% 
     filter(!is.na(Size.class)) 
   
-  # REMOVE FRINGING REEF DATA
-  prev_mod_data <- prev_mod_data %>% 
-    filter(Habitat_go=='Lagoon')
-  
   # subset size class
   if(is.numeric(size_class)==TRUE){prev_mod_data <- prev_mod_data %>% filter(Size.class==size_class)}
   prev_mod_data$Size.class <- ifelse(prev_mod_data$Size.class==1|prev_mod_data$Size.class==2,1,prev_mod_data$Size.class)
@@ -106,10 +102,6 @@ for(k in c("Pocillopora", "Acropora")){
     filter(!is.na(Depth)) %>% 
     filter(!is.na(Size.class)) 
   
-  # REMOVE FRINGING REEF DATA
-  prev_mod_data <- prev_mod_data %>% 
-    filter(Habitat_go=='Lagoon')
-  
   # subset size class
   if(is.numeric(size_class)==TRUE){prev_mod_data <- prev_mod_data %>% filter(Size.class==size_class)}
   prev_mod_data$Size.class <- ifelse(prev_mod_data$Size.class==1|prev_mod_data$Size.class==2,1,prev_mod_data$Size.class)
@@ -166,10 +158,6 @@ for(k in c("Pocillopora", "Acropora")){
       filter(!is.na(Depth)) %>% 
       filter(!is.na(Size.class)) 
     
-    # REMOVE FRINGING REEF DATA
-    prev_mod_data <- prev_mod_data %>% 
-      filter(Habitat_go=='Lagoon')
-    
     # subset size class
     if(is.numeric(size_class)==TRUE){prev_mod_data <- prev_mod_data %>% filter(Size.class==size_class)}
     prev_mod_data$Size.class <- ifelse(prev_mod_data$Size.class==1|prev_mod_data$Size.class==2,1,prev_mod_data$Size.class)
@@ -198,7 +186,7 @@ plot(prev_Pocillopora_3Size_pp_dens)
 plot(prev_Acropora_3Size_pp_hist)
 plot(prev_Acropora_3Size_pp_dens)
 
-### Prevalence 4Size  ------------------------------------------------------------ 
+# Prevalence 4Size  ------------------------------------------------------------ 
 
 for(k in c("Pocillopora", "Acropora")){
   genus <- k
@@ -226,10 +214,6 @@ for(k in c("Pocillopora", "Acropora")){
     filter(!is.na(response)) %>% 
     filter(!is.na(Depth)) %>% 
     filter(!is.na(Size.class)) 
-  
-  # REMOVE FRINGING REEF DATA
-  prev_mod_data <- prev_mod_data %>% 
-    filter(Habitat_go=='Lagoon')
   
   # subset size class
   if(is.numeric(size_class)==TRUE){prev_mod_data <- prev_mod_data %>% filter(Size.class==size_class)}
@@ -259,7 +243,7 @@ plot(prev_Pocillopora_4Size_pp_dens)
 plot(prev_Acropora_4Size_pp_hist)
 plot(prev_Acropora_4Size_pp_dens)
 
-### Severity All ------------------------------------------------------------ 
+# Severity All Size ------------------------------------------------------------ 
 
 for(k in c("Pocillopora", "Acropora")){
   genus <- k
@@ -288,10 +272,6 @@ for(k in c("Pocillopora", "Acropora")){
     filter(!is.na(response)) %>% 
     filter(!is.na(Depth)) %>% 
     filter(!is.na(Size.class)) 
-  
-  # REMOVE FRINGING REEF DATA
-  sev_mod_data <- sev_mod_data %>% 
-    filter(Habitat_go=='Lagoon')
   
   # subset size class
   if(is.numeric(size_class)==TRUE){sev_mod_data <- sev_mod_data %>% filter(Size.class==size_class)}
@@ -325,7 +305,7 @@ plot(sev_Pocillopora_allSize_pp_hist)
 plot(sev_Acropora_allSize_pp_hist)
 plot(sev_Acropora_allSize_pp_hist)
 
-### Combining Plots------------------------------------------------
+# Combining Plots --------------------------------------------------------------
 
 # Prevalence
 
