@@ -24,7 +24,7 @@ for(i in c(1,3,4)){
       mod_version <- "Nsubmodel"
       mod_version_jags <- paste0(z,"_hierarchical.jags")
       out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-      mod_date <- "2025-02-21" #remember to put correct date here
+      mod_date <- "2025-02-25" #remember to put correct date here
       
       mod <- readRDS(paste0('model_out/',distgo,'_',genus,'_',response,'_',size_class,'Size_',mod_date,'_',mod_version,'.Rdata'))
       mod_sum <- summary(mod)
@@ -97,7 +97,7 @@ for(i in c("all")){
         mod_version <- "Nsubmodel"
         mod_version_jags <- paste0(z,"_hierarchical.jags")
         out_dir <- paste0("model_out/",mod_version,"/",response,"/")
-        mod_date <- "2025-02-21"  #remember to put correct date here
+        mod_date <- "2025-02-25"  #remember to put correct date here
         
         mod <- readRDS(paste0('model_out/',distgo,'_',genus,'_',response,'_',size_class,'Size_',mod_date,'_',mod_version,'.Rdata'))
         mod_sum <- summary(mod)

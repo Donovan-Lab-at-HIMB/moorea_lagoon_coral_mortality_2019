@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------#
-# Effects of nitrogen enrichment on coral mortality depend on the intensity of heat stress
+# Nitrogen enrichment determines coral mortality during a marine heatwave
 #  
 # 4_mod_checks
 # -----------------------------------------------------------------------------#
