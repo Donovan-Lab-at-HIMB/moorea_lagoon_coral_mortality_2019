@@ -1,5 +1,5 @@
-# moorea_lagoon_bleaching_2019
-moorea_lagoon_bleaching_2019
+# moorea_lagoon_coral_mortality_2019
+moorea_lagoon_coral_mortality_2019
 
 This project analyzes patterns of coral mortality prevalence and severity for Pocillopora and Acropora corals in Moorea followning a marine heatwave in 2019. We evaluate relationships betweeen nitrogen enrichment, heats stress, and coral mortality prevalence and severity. 
 
