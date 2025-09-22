@@ -19,14 +19,14 @@ library(tidyverse)
 dir.create("data")
 dir.create("data/final_model_inputs")
 
-# EDI data packageID is: "knb-lter-mcr.2014.1"
-read_data_package(packageId="knb-lter-mcr.2014.1")
+# EDI data packageID is: "knb-lter-mcr.2014.2"
+read_data_package(packageId="knb-lter-mcr.2014.2")
 
 # read data package, download package zip to folder
-read_data_package_archive(packageId="knb-lter-mcr.2014.1", path = "data/final_model_inputs/")
+read_data_package_archive(packageId="knb-lter-mcr.2014.2", path = "data/final_model_inputs/")
 
 # unzip the file
-unzip("data/final_model_inputs/knb-lter-mcr.2014.1.zip", exdir ="data/final_model_inputs/")
+unzip("data/final_model_inputs/knb-lter-mcr.2014.2.zip", exdir ="data/final_model_inputs/")
 
 
 # create folders for storing figs and model outputs ----------------------------#
