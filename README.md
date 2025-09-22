@@ -1,4 +1,4 @@
-https://doi.org/10.5281/zenodo.17180203
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17180203.svg)](https://doi.org/10.5281/zenodo.17180203)
 
 # moorea_lagoon_coral_mortality_2019
 moorea_lagoon_coral_mortality_2019
